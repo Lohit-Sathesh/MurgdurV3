@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Default brand colour tokens ───────────────────────────────────────────
+   All Tailwind luxury-* colour utilities reference these CSS variables via
+   rgb(var(--color-*-rgb) / <alpha-value>).  Override these in layout.tsx
+   to apply admin-configured colours globally.
+   Channels are space-separated so Tailwind's opacity modifier syntax works:
+   e.g. bg-luxury-black/20 → background: rgb(255 255 255 / 0.2)
+── */
+:root {
+  --color-bg-rgb:    255 255 255;   /* luxury-black  = #ffffff  */
+  --color-text-rgb:  26  26  26;    /* luxury-white  = #1a1a1a  */
+  --color-gold-rgb:  201 169 110;   /* luxury-gold   = #c9a96e  */
+  --color-gray-rgb:  228 223 214;   /* luxury-gray   = #e4dfd6  */
+  --color-muted-rgb: 111 108 100;   /* luxury-muted  = #6f6c64  */
+
+  /* Default font stacks — override by admin theme at runtime */
+  --font-serif: var(--font-playfair), 'Playfair Display', Georgia, serif;
+  --font-sans:  var(--font-inter), Inter, system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: auto; } /* Lenis handles scroll */
+
+body {
+  font-family: var(--font-sans), sans-serif;
+  background: rgb(var(--color-bg-rgb));
+  color: rgb(var(--color-text-rgb));
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: var(--font-serif), serif; font-weight: 600; letter-spacing: 0.05em; }
+
+::selection {
+  background: rgb(var(--color-gold-rgb));
+  color: rgb(var(--color-bg-rgb));
+}
+
+::-webkit-scrollbar { display: none; }

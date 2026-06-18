@@ -1,0 +1,51 @@
+# ── Dependencies ──────────────────────────────────────────────
+node_modules/
+
+# ── Build output ──────────────────────────────────────────────
+dist/
+.next/
+out/
+build/
+
+# ── Environment / secrets (keep .env.example files) ──────────
+.env
+.env.*
+!.env.example
+!*/.env.example
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Testing / coverage ────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── Editor / IDE ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── TypeScript ────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Misc ──────────────────────────────────────────────────────
+*.pem
+*.tgz
+.turbo/
+
+# ── Prisma generated client tmp files ─────────────────────────
+**/query_engine-*.tmp*

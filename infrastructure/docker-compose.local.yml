@@ -1,0 +1,95 @@
+﻿services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: murgdur-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Superme2
+      POSTGRES_DB: murgdurV2
+    ports:
+      - "5432:5432"
+    volumes:
+      - murgdur_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: murgdur-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - murgdur_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    container_name: murgdur-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: "murgdur-local-master-key"
+      MEILI_ENV: development
+    ports:
+      - "7700:7700"
+    volumes:
+      - murgdur_meili_data:/meili_data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:7700/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: run the full app stack in containers too.
+  #   docker compose -f infrastructure/docker-compose.local.yml --profile full up -d --build
+  # Normally these are run with `npm run start:dev` / `npm run dev` outside Docker.
+  backend:
+    profiles: ["full"]
+    build:
+      context: ../backend
+    container_name: murgdur-backend
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env.local
+    environment:
+      DATABASE_URL: "postgresql://postgres:Superme2@postgres:5432/murgdurV2?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      MEILISEARCH_HOST: "http://meilisearch:7700"
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["full"]
+    build:
+      context: ../frontend
+    container_name: murgdur-frontend
+    restart: unless-stopped
+    env_file:
+      - ../frontend/.env.local
+    environment:
+      INTERNAL_API_URL: "http://backend:3001"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  murgdur_postgres_data:
+  murgdur_redis_data:
+  murgdur_meili_data:

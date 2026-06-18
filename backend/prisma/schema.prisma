@@ -1,0 +1,508 @@
+// ============================================================
+// MURGDUR LUXURY PLATFORM — Prisma Schema
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USER & AUTH
+// ============================================================
+
+model User {
+  id            String   @id @default(uuid())
+  customerId    String   @unique
+  email         String   @unique
+  passwordHash  String?
+  firstName     String
+  lastName      String
+  phone         String?
+  avatarUrl     String?
+  role          Role     @default(CUSTOMER)
+  emailVerified Boolean  @default(false)
+  phoneVerified Boolean  @default(false)
+  newsletterSubscribed Boolean @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  tempOrders    TempOrder[]
+  invoices      Invoice[]
+  wishlist      WishlistItem[]
+  sessions      Session[]
+  reviews       Review[]
+
+  @@index([email])
+  @@index([customerId])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  tokenHash String   @unique
+  ipAddress String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("sessions")
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  userId     String
+  label      String?
+  firstName  String
+  lastName   String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("IN")
+  phone      String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders     Order[]
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model OtpCode {
+  id        String   @id @default(uuid())
+  identifier String  // email address or phone number
+  purpose   String   // 'email' | 'phone'
+  codeHash  String
+  attempts  Int      @default(0)
+  consumed  Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([identifier, purpose])
+  @@map("otp_codes")
+}
+
+// ============================================================
+// CATALOGUE
+// ============================================================
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  imageUrl    String?
+  parentId    String?
+  sortOrder   Int        @default(0)
+  isActive    Boolean    @default(true)
+  pageType    String     @default("products")
+  linkUrl     String?    // for pageType === 'link': redirect destination
+  createdAt   DateTime   @default(now())
+
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  products    Product[]
+  highlights  CategoryHighlight[]
+  infoBlocks  CategoryInfoBlock[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model CategoryHighlight {
+  id           String   @id @default(uuid())
+  categoryId   String
+  imageUrl     String
+  mediaType    String   @default("image")
+  title        String   @default("")
+  subheading   String?
+  linkUrl      String?
+  placement    String   @default("menu")
+  textTheme    String   @default("dark")
+  textPosition  String   @default("center")
+  layout        String   @default("full")  // full | split-left-image-products | split-right-image-products | split-left-image-text | split-right-image-text
+  showAfterRows Int      @default(1)        // gallery only: inject after this many product rows
+  sortOrder     Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId, placement, sortOrder])
+  @@map("category_highlights")
+}
+
+model CategoryInfoBlock {
+  id         String   @id @default(uuid())
+  categoryId String
+  sortOrder  Int      @default(0)
+  mediaUrl   String?
+  mediaType  String   @default("image")
+  textTheme  String   @default("dark")
+  heading    String?
+  body       String?
+  layout     String   @default("full")
+  createdAt  DateTime @default(now())
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId, sortOrder])
+  @@map("category_info_blocks")
+}
+
+model Product {
+  id               String           @id @default(uuid())
+  name             String
+  slug             String           @unique
+  sku              String           @unique
+  description      String
+  shortDesc        String?
+  price            Decimal          @db.Decimal(10, 2)
+  comparePrice     Decimal?         @db.Decimal(10, 2)
+  currency         String           @default("INR")
+  categoryId       String
+  brand            String           @default("Murgdur")
+  material         String?
+  careInstructions String?
+  origin           String?
+  isActive         Boolean          @default(true)
+  isFeatured       Boolean          @default(false)
+  metaTitle        String?
+  metaDesc         String?
+  // Per-product style overrides (set in admin catalog)
+  styleFontSize    Int?
+  styleTextColor   String?
+  styleAccentColor String?
+  styleBgColor     String?
+  // Size guide assignment (null = Free Size / no guide button shown)
+  sizeGuideId      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  category         Category         @relation(fields: [categoryId], references: [id])
+  sizeGuide        SizeGuide?       @relation(fields: [sizeGuideId], references: [id], onDelete: SetNull)
+  variants         ProductVariant[]
+  images           ProductImage[]
+  orderItems       OrderItem[]
+  wishlistItems    WishlistItem[]
+  reviews          Review[]
+  tags             ProductTag[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([isActive, isFeatured])
+  @@map("products")
+}
+
+model ProductVariant {
+  id        String    @id @default(uuid())
+  productId String
+  sku       String    @unique
+  color     String?
+  colorHex  String?
+  size      String?
+  stock     Int       @default(0)
+  price     Decimal?  @db.Decimal(10, 2)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  product    Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  images     ProductImage[]
+
+  @@index([productId])
+  @@index([sku])
+  @@map("product_variants")
+}
+
+model ProductImage {
+  id        String   @id @default(uuid())
+  productId String
+  variantId String?
+  url       String
+  altText   String?
+  sortOrder Int      @default(0)
+  isVideo   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([variantId])
+  @@map("product_images")
+}
+
+model ProductTag {
+  id        String  @id @default(uuid())
+  productId String
+  tag       String
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tag])
+  @@index([tag])
+  @@map("product_tags")
+}
+
+// ============================================================
+// INVOICES
+// ============================================================
+
+model Invoice {
+  id          String   @id @default(uuid())
+  orderId     String   @unique
+  userId      String
+  orderNumber String
+  pdfUrl      String   // URL to PDF stored in R2
+  createdAt   DateTime @default(now())
+
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("invoices")
+}
+
+// ============================================================
+// TEMP ORDERS (WhatsApp concierge — expires 7 days after creation)
+// ============================================================
+
+model TempOrder {
+  id           String   @id                    // 6-digit numeric string
+  userId       String
+  addressId    String
+  customerName String
+  items        Json                             // cart item snapshots
+  subtotal     Float
+  tax          Float
+  shipping     Float
+  total        Float
+  expiresAt    DateTime                         // createdAt + 7 days
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("temp_orders")
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+model Order {
+  id            String        @id @default(uuid())
+  orderNumber   String        @unique
+  userId        String
+  addressId     String
+  status        OrderStatus   @default(PENDING)
+  subtotal      Decimal       @db.Decimal(10, 2)
+  tax           Decimal       @db.Decimal(10, 2)
+  shippingFee   Decimal       @db.Decimal(10, 2) @default(0)
+  total         Decimal       @db.Decimal(10, 2)
+  currency      String        @default("INR")
+  notes         String?
+  paymentRef    String?
+  paymentMethod String        @default("COD")
+  paymentStatus PaymentStatus @default(PENDING)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user          User          @relation(fields: [userId], references: [id])
+  address       Address       @relation(fields: [addressId], references: [id])
+  items         OrderItem[]
+  invoice       Invoice?
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String          @id @default(uuid())
+  orderId    String
+  productId  String
+  variantId  String?
+  quantity   Int
+  unitPrice  Decimal         @db.Decimal(10, 2)
+  totalPrice Decimal         @db.Decimal(10, 2)
+  snapshot   Json
+
+  order      Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [productId], references: [id])
+  variant    ProductVariant? @relation(fields: [variantId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// ============================================================
+// WISHLIST
+// ============================================================
+
+model WishlistItem {
+  id        String   @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist_items")
+}
+
+// ============================================================
+// REVIEWS
+// ============================================================
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  productId  String
+  rating     Int
+  title      String?
+  body       String?
+  isVerified Boolean  @default(false)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([productId, isApproved])
+  @@map("reviews")
+}
+
+// ============================================================
+// SIZE GUIDES
+// ============================================================
+
+model SizeGuide {
+  id        String    @id @default(uuid())
+  name      String
+  sortOrder Int       @default(0)
+  // Array of blocks: { id, type: 'image'|'table'|'text', ...fields }
+  blocks    Json      @default("[]")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  Product[]
+
+  @@map("size_guides")
+}
+
+// ============================================================
+// SITE CONFIG
+// ============================================================
+
+model SiteConfig {
+  id            String   @id @default("main")
+  fontFamily    String   @default("default")
+  fontSize      Int      @default(16)
+  fontWeight    String   @default("400")
+  fontStyle     String   @default("normal")
+  siteTitle     String   @default("MURGDUR")
+  siteMotto     String   @default("Maison Murgdur")
+  buttons       Json     @default("[]")
+  // Brand colours (stored as hex, e.g. "#c9a96e")
+  colorGold     String   @default("#c9a96e")
+  colorText     String   @default("#1a1a1a")
+  colorBg       String   @default("#ffffff")
+  colorMuted    String   @default("#6f6c64")
+  // Footer content
+  footerTagline      String   @default("Luxury fashion crafted for the extraordinary.")
+  footerNote         String   @default("© 2026 Murgdur. All rights reserved.")
+  footerColumns      Json     @default("[]")
+  textStyles         Json     @default("{}")
+  productAccordions      Json     @default("[]")
+  // Homepage editable text sections
+  homepageSections       Json     @default("[]")
+  // Store pricing
+  shippingCost           Float    @default(0)
+  taxRate                Float    @default(0)
+  taxLabel               String   @default("Tax")
+  whatsappNumber           String  @default("")
+  whatsappMessageTemplate  String  @default("")
+  whatsappImageUrl         String  @default("")
+  invoiceEmailSubject      String  @default("")   // subject for invoice confirmation email
+  invoiceEmailBody         String  @default("")   // body template: {{orderNumber}} {{customerName}} {{total}}
+  // Size guide drawer footer
+  sizeGuideContactText     String   @default("Need help with sizing?")
+  sizeGuideContactLinkText String   @default("Contact our stylists")
+  sizeGuideContactLinkUrl  String   @default("/contact")
+  updatedAt     DateTime @updatedAt
+
+  @@map("site_config")
+}
+
+// ============================================================
+// HOMEPAGE SLIDES
+// ============================================================
+
+model HomepageSlide {
+  id           String   @id @default(uuid())
+  mediaUrl     String
+  mediaType    String   @default("image")
+  placement    String   @default("hero")
+  textTheme    String   @default("dark")
+  textPosition String   @default("center")  // center | top-left | top-right | bottom-left | bottom-right
+  headline     String   @default("")
+  subheading   String?
+  linkUrl      String?
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@index([isActive, sortOrder])
+  @@map("homepage_slides")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  CUSTOMER
+  ADMIN
+  SUPPORT
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+  PROCESSING   // legacy — mapped to CONFIRMED in UI
+  REFUNDED     // legacy — mapped to CANCELLED in UI
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}

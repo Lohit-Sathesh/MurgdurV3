@@ -1,0 +1,24 @@
+{
+  "rules": [
+    {
+      "description": "Block obvious scraper/bot user agents",
+      "expression": "(http.user_agent contains \"scrapy\") or (http.user_agent contains \"curl\" and not http.request.uri.path contains \"/health\")",
+      "action": "block"
+    },
+    {
+      "description": "Challenge suspicious traffic to login and registration (pair with a separate Rate Limiting rule in the dashboard: Security > WAF > Rate limiting rules, e.g. 10 req/min per IP on these paths)",
+      "expression": "(http.request.uri.path eq \"/api/auth/login\") or (http.request.uri.path eq \"/api/auth/register\")",
+      "action": "challenge"
+    },
+    {
+      "description": "Block cross-site requests to the admin API (no matching Origin header)",
+      "expression": "(http.request.uri.path contains \"/api/admin\") and (http.request.method ne \"GET\") and not (http.request.headers[\"origin\"][0] contains \"murgdur.example\")",
+      "action": "block"
+    },
+    {
+      "description": "Challenge requests from known bad ASNs / Tor exit nodes",
+      "expression": "(ip.src.is_in_european_union eq false) and (cf.threat_score gt 30)",
+      "action": "managed_challenge"
+    }
+  ]
+}

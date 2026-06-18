@@ -1,0 +1,29 @@
+{
+  "rules": [
+    {
+      "target": "murgdur.example/_next/static/*",
+      "cacheLevel": "cache_everything",
+      "edgeCacheTtl": 31536000
+    },
+    {
+      "target": "media.murgdur.example/*",
+      "cacheLevel": "cache_everything",
+      "edgeCacheTtl": 86400
+    },
+    {
+      "target": "murgdur.example/api/*",
+      "cacheLevel": "bypass"
+    },
+    {
+      "target": "murgdur.example/admin/*",
+      "cacheLevel": "bypass"
+    },
+    {
+      "target": "www.murgdur.example/*",
+      "forwardingUrl": {
+        "url": "https://murgdur.example/$1",
+        "statusCode": 301
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+# Run before rolling out a new backend image whenever the Prisma schema has
+# changed. ArgoCD/CI should `kubectl delete job backend-migrate -n murgdur
+# --ignore-not-found` then `kubectl apply -f migration-job.yaml` and wait for
+# completion before the backend Deployment rolls out (or use an ArgoCD
+# PreSync hook, see annotation below).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: backend-migrate
+  namespace: murgdur
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: ghcr.io/example/murgdur-backend:latest
+          command: ["npx", "prisma", "migrate", "deploy"]
+          envFrom:
+            - configMapRef:
+                name: murgdur-config
+            - secretRef:
+                name: murgdur-secrets

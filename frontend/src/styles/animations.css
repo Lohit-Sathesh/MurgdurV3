@@ -1,0 +1,1 @@
+﻿@keyframes soft-enter{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}.motion-soft-enter{animation:soft-enter 700ms ease both}
