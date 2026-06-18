@@ -98,13 +98,13 @@ export function HeroSlider({ slides }: { slides?: HeroSlide[] }) {
 
           <div className={`absolute inset-0 flex flex-col z-10 ${positionClasses(slide.textPosition)}`}>
             {slide.subheading && (
-              <p className="text-luxury-gold text-xs tracking-luxury uppercase mb-6"
+              <p className="text-luxury-gold text-[9px] sm:text-[10px] md:text-xs tracking-[0.1em] sm:tracking-[0.2em] md:tracking-luxury uppercase mb-2 sm:mb-4 md:mb-6"
                 style={subheadingStyle}>
                 {slide.subheading}
               </p>
             )}
             {slide.headline && (
-              <h1 className={`font-serif text-6xl md:text-8xl tracking-luxury mb-12 ${
+              <h1 className={`font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl xl:text-8xl tracking-[0.05em] sm:tracking-wide md:tracking-luxury mb-4 md:mb-10 ${
                 slide.textTheme === 'light' ? 'text-luxury-black' : 'text-luxury-white'
               }`}
                 style={{
@@ -116,7 +116,7 @@ export function HeroSlider({ slides }: { slides?: HeroSlide[] }) {
             )}
             {slide.linkUrl && (
               <Link href={slide.linkUrl}
-                className={`border text-xs tracking-luxury uppercase px-10 py-4 transition-all duration-500 ${
+                className={`border text-[10px] sm:text-xs tracking-[0.1em] sm:tracking-luxury uppercase px-4 sm:px-6 py-2.5 sm:py-3 md:px-10 md:py-4 transition-all duration-500 ${
                   slide.textTheme === 'light'
                     ? 'border-luxury-black text-luxury-black hover:bg-luxury-black hover:text-luxury-white'
                     : 'border-luxury-white text-luxury-white hover:bg-luxury-white hover:text-luxury-black'

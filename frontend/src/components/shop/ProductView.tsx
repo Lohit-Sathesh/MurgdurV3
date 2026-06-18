@@ -158,14 +158,15 @@ export function ProductView({ product }: { product: Product }) {
 
       {/* ── Right: sticky details panel ──────────────────────────────────── */}
       <div className="lg:sticky lg:top-20 lg:self-start
-                      px-8 py-10 space-y-7 border-l border-luxury-gray">
+                      px-4 md:px-8 py-6 md:py-10 space-y-6 md:space-y-7
+                      lg:border-l border-t lg:border-t-0 border-luxury-gray">
 
         {/* Stock badge */}
         {totalStock === 0 && <Badge variant="out-of-stock">Out of Stock</Badge>}
         {totalStock > 0 && totalStock < 10 && <Badge variant="low-stock">Only {totalStock} left</Badge>}
 
         {/* Product name */}
-        <h1 className="font-serif text-2xl md:text-3xl tracking-luxury text-luxury-white leading-snug"
+        <h1 className="font-serif text-lg sm:text-xl md:text-2xl lg:text-3xl tracking-[0.08em] sm:tracking-luxury text-luxury-white leading-snug"
           style={sectionStyle}>
           {product.name}
         </h1>
@@ -229,7 +230,7 @@ export function ProductView({ product }: { product: Product }) {
                     key={size}
                     onClick={() => !oos && selectSize(size)}
                     disabled={oos}
-                    className={`min-w-[48px] px-3 py-2.5 text-[10px] tracking-luxury border transition-all duration-300 ${
+                    className={`min-w-[44px] px-2 sm:px-3 py-3 text-[9px] sm:text-[10px] tracking-[0.08em] sm:tracking-luxury border transition-all duration-300 ${
                       selectedVariant?.size === size
                         ? 'border-luxury-white text-luxury-white bg-luxury-white/5'
                         : oos

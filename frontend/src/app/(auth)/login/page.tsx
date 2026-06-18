@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-luxury-black flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <h1 className="font-serif text-4xl tracking-luxury text-luxury-white text-center mb-12">Sign In</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl tracking-[0.1em] sm:tracking-luxury text-luxury-white text-center mb-8 md:mb-12">Sign In</h1>
         <div className="space-y-5">
           <Input label="Email"    type="email"    value={email}    onChange={e => setEmail(e.target.value)}    />
           <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />

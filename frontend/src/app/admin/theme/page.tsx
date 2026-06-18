@@ -258,7 +258,7 @@ export default function ThemePage() {
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'colours' | 'fonts' | 'identity' | 'typography' | 'content' | 'footer' | 'product' | 'buttons' | 'store'>('colours')
+  const [activeTab, setActiveTab] = useState<'colours' | 'fonts' | 'identity' | 'typography' | 'sizeguide' | 'footer' | 'product' | 'buttons' | 'store'>('colours')
 
   // Load saved config
   useEffect(() => {
@@ -358,15 +358,15 @@ export default function ThemePage() {
   const previewFamily = FONT_MAP[fontFamily] || 'inherit'
 
   const TABS: { id: typeof activeTab; label: string }[] = [
-    { id: 'colours',    label: 'Colours'       },
-    { id: 'fonts',      label: 'Global Font'   },
-    { id: 'identity',   label: 'Identity'      },
-    { id: 'typography', label: 'Typography'    },
-    { id: 'content',    label: 'Homepage Text' },
-    { id: 'footer',     label: 'Footer'        },
-    { id: 'product',    label: 'Product Info'  },
-    { id: 'store',      label: 'Store'         },
-    { id: 'buttons',    label: 'Buttons'       },
+    { id: 'colours',   label: 'Colours'            },
+    { id: 'fonts',     label: 'Global Font'        },
+    { id: 'identity',  label: 'Identity'           },
+    { id: 'typography',label: 'Typography'         },
+    { id: 'footer',    label: 'Footer'             },
+    { id: 'product',   label: 'Product Info'       },
+    { id: 'sizeguide', label: 'Size Guide Footer'  },
+    { id: 'store',     label: 'Store'              },
+    { id: 'buttons',   label: 'Buttons'            },
   ]
 
   return (
@@ -499,131 +499,35 @@ export default function ThemePage() {
         </div>
       )}
 
-      {/* ══ HOMEPAGE TEXT ════════════════════════════════════════════════════ */}
-      {activeTab === 'content' && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <p className="text-luxury-muted text-xs">
-              Edit, reorder, add or remove homepage text sections. Use ▲▼ to change order. Custom sections render as editorial blocks.
-            </p>
-            <button
-              onClick={() => {
-                const newId = `custom-${Date.now()}`
-                setHomepageSections(prev => [...prev, {
-                  id:          newId,
-                  isActive:    true,
-                  eyebrow:     '',
-                  headline:    '',
-                  description: '',
-                  buttonLabel: '',
-                  buttonUrl:   '',
-                }])
-                // Scroll to the new section after React re-renders
-                requestAnimationFrame(() => requestAnimationFrame(() => {
-                  document.getElementById(`hps-${newId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-                }))
-              }}
-              className="shrink-0 ml-4 text-luxury-gold text-xs tracking-luxury uppercase hover:text-luxury-white transition-colors">
-              + Add Section
-            </button>
+      {/* ══ SIZE GUIDE DRAWER FOOTER ════════════════════════════════════════ */}
+      {activeTab === 'sizeguide' && (
+        <div className="space-y-5">
+          <p className="text-luxury-muted text-xs">
+            The text and link shown at the bottom of the Size Guide drawer on product pages.
+          </p>
+          <div>
+            <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Text before the link</label>
+            <input value={sgContactText} onChange={e => setSgContactText(e.target.value)}
+              placeholder="Need help with sizing?"
+              className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-2 text-sm outline-none focus:border-luxury-gold" />
           </div>
-
-          {/* Homepage sections — fully reorderable */}
-          {homepageSections.map((sec, i) => {
-            const isFixed = ['new-arrivals','featured','editorial','philosophy','newsletter'].includes(sec.id)
-            const update  = (field: keyof HomepageSection, val: any) =>
-              setHomepageSections(prev => prev.map((s, j) => j === i ? { ...s, [field]: val } : s))
-            const moveUp   = () => i > 0                        && setHomepageSections(prev => { const n=[...prev]; [n[i-1],n[i]]=[n[i],n[i-1]]; return n })
-            const moveDown = () => i < homepageSections.length-1 && setHomepageSections(prev => { const n=[...prev]; [n[i],n[i+1]]=[n[i+1],n[i]]; return n })
-
-            return (
-              <div key={sec.id} id={`hps-${sec.id}`} className={`border rounded-xl p-5 space-y-4 transition-colors ${sec.isActive ? 'border-luxury-gray/60' : 'border-luxury-gray/20 opacity-40'}`}>
-                {/* Header row */}
-                <div className="flex items-center gap-2">
-                  {/* Up/down */}
-                  <div className="flex flex-col gap-0.5 shrink-0">
-                    <button onClick={moveUp}   disabled={i===0}                         className="text-luxury-muted text-[10px] hover:text-luxury-white disabled:opacity-20 leading-none">▲</button>
-                    <button onClick={moveDown} disabled={i===homepageSections.length-1} className="text-luxury-muted text-[10px] hover:text-luxury-white disabled:opacity-20 leading-none">▼</button>
-                  </div>
-                  <p className="flex-1 text-luxury-white text-xs tracking-luxury uppercase font-medium">
-                    {isFixed ? sec.id.replace(/-/g, ' ') : (sec.headline || sec.eyebrow || 'Custom Section')}
-                    {!isFixed && <span className="ml-2 text-luxury-gold text-[9px] normal-case tracking-normal">custom</span>}
-                  </p>
-                  <label className="flex items-center gap-1.5 cursor-pointer text-luxury-muted text-xs shrink-0">
-                    <input type="checkbox" checked={sec.isActive} onChange={e => update('isActive', e.target.checked)} className="accent-luxury-gold w-4 h-4" />
-                    Active
-                  </label>
-                  {!isFixed && (
-                    <button onClick={() => setHomepageSections(prev => prev.filter((_, j) => j !== i))}
-                      className="text-red-400 text-[10px] hover:text-red-300 transition-colors shrink-0 ml-1">
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {/* Fields */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Eyebrow</label>
-                    <input value={sec.eyebrow} onChange={e => update('eyebrow', e.target.value)}
-                      className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                  </div>
-                  <div>
-                    <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Headline</label>
-                    <input value={sec.headline} onChange={e => update('headline', e.target.value)}
-                      className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                  </div>
-                  <div className="col-span-2">
-                    <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Description</label>
-                    <textarea value={sec.description} rows={2} onChange={e => update('description', e.target.value)}
-                      className="w-full bg-luxury-black border border-luxury-gray text-luxury-muted px-3 py-1.5 text-xs outline-none focus:border-luxury-gold resize-none" />
-                  </div>
-                  <div>
-                    <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Button Label (optional)</label>
-                    <input value={sec.buttonLabel} onChange={e => update('buttonLabel', e.target.value)}
-                      placeholder="Leave blank for no button"
-                      className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                  </div>
-                  <div>
-                    <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Button URL</label>
-                    <input value={sec.buttonUrl} onChange={e => update('buttonUrl', e.target.value)}
-                      placeholder="/collections/..."
-                      className="w-full bg-luxury-black border border-luxury-gray text-luxury-muted px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-
-          {/* Size guide drawer contact */}
-          <div className="border border-luxury-gray/60 rounded-xl p-5 space-y-4">
-            <p className="text-luxury-white text-xs tracking-luxury uppercase font-medium">Size Guide Drawer — Footer Text</p>
-            <p className="text-luxury-muted text-[10px]">The text and link shown at the bottom of the size guide drawer (e.g. "Need help with sizing? Contact our stylists").</p>
-            <div className="grid grid-cols-1 gap-3">
-              <div>
-                <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Text before the link</label>
-                <input value={sgContactText} onChange={e => setSgContactText(e.target.value)}
-                  className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Link text</label>
-                  <input value={sgContactLinkText} onChange={e => setSgContactLinkText(e.target.value)}
-                    className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                </div>
-                <div>
-                  <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Link URL</label>
-                  <input value={sgContactLinkUrl} onChange={e => setSgContactLinkUrl(e.target.value)}
-                    placeholder="/contact"
-                    className="w-full bg-luxury-black border border-luxury-gray text-luxury-muted px-3 py-1.5 text-xs outline-none focus:border-luxury-gold" />
-                </div>
-              </div>
-              {/* Live preview */}
-              <p className="text-luxury-muted text-[10px] pt-1">
-                Preview: {sgContactText} <span className="text-luxury-white underline">{sgContactLinkText}</span>
-              </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Link text</label>
+              <input value={sgContactLinkText} onChange={e => setSgContactLinkText(e.target.value)}
+                placeholder="Contact our stylists"
+                className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-2 text-sm outline-none focus:border-luxury-gold" />
+            </div>
+            <div>
+              <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Link URL</label>
+              <input value={sgContactLinkUrl} onChange={e => setSgContactLinkUrl(e.target.value)}
+                placeholder="/contact"
+                className="w-full bg-luxury-black border border-luxury-gray text-luxury-muted px-3 py-2 text-sm outline-none focus:border-luxury-gold" />
             </div>
           </div>
+          <p className="text-luxury-muted text-[10px] pt-1 tracking-luxury">
+            Preview: {sgContactText} <span className="text-luxury-white underline">{sgContactLinkText}</span>
+          </p>
         </div>
       )}
 

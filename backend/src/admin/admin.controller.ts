@@ -584,6 +584,34 @@ export class AdminController {
     return { reindexed: products.length };
   }
 
+  // ── Homepage Blocks (page builder) ──────────────────────────────────────────
+
+  @Get('homepage-blocks')
+  @AdminOnly()
+  getBlocks() {
+    return this.prisma.homepageBlock.findMany({ orderBy: { sortOrder: 'asc' } })
+  }
+
+  @Post('homepage-blocks')
+  @AdminOnly()
+  createBlock(@Body() body: { type: string; sortOrder?: number; content?: any }) {
+    return this.prisma.homepageBlock.create({
+      data: { type: body.type, sortOrder: body.sortOrder ?? 0, content: body.content ?? {} },
+    })
+  }
+
+  @Patch('homepage-blocks/:id')
+  @AdminOnly()
+  updateBlock(@Param('id') id: string, @Body() body: { sortOrder?: number; isActive?: boolean; content?: any }) {
+    return this.prisma.homepageBlock.update({ where: { id }, data: body })
+  }
+
+  @Delete('homepage-blocks/:id')
+  @AdminOnly()
+  deleteBlock(@Param('id') id: string) {
+    return this.prisma.homepageBlock.delete({ where: { id } })
+  }
+
   /**
    * Get all homepage slides (admin only)
    */

@@ -156,7 +156,7 @@ export function ProductGrid({ products: initialProducts, total, query, gallerySl
         if (seg.type === 'grid') {
           return (
             <div key={`grid-${i}`}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-8 py-12">
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
               {seg.products.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           )
@@ -179,9 +179,9 @@ export function ProductGrid({ products: initialProducts, total, query, gallerySl
 
         const productsSide = content === 'text' ? (
           // Text panel
-          <div className={`h-full bg-luxury-black flex flex-col ${positionClasses(slide.textPosition)} px-12`}>
+          <div className={`h-full bg-luxury-black flex flex-col ${positionClasses(slide.textPosition)} px-4 sm:px-8 md:px-12`}>
             {slide.headline && (
-              <h2 className={`font-serif text-4xl tracking-luxury mb-4 ${light ? 'text-luxury-black' : 'text-luxury-white'}`}>
+              <h2 className={`font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-[0.08em] sm:tracking-luxury mb-3 md:mb-4 ${light ? 'text-luxury-black' : 'text-luxury-white'}`}>
                 {slide.headline}
               </h2>
             )}
@@ -207,9 +207,33 @@ export function ProductGrid({ products: initialProducts, total, query, gallerySl
           </div>
         )
 
+        // ── Mobile: stack image then products; Desktop: side-by-side ──────────
+        const mobileImage = (
+          <div className="relative w-full overflow-hidden" style={{ aspectRatio: '4/3' }}>
+            <MediaHalf slide={slide} />
+          </div>
+        )
+        const mobileProducts = content === 'products'
+          ? <div className="grid grid-cols-2 gap-3 px-4 py-6">{seg.products.map(p => <ProductCard key={p.id} product={p} />)}</div>
+          : (
+            <div className="px-6 py-8 flex flex-col justify-center">
+              {slide.headline && <h2 className={`font-serif text-xl tracking-wide mb-3 ${light ? 'text-luxury-black' : 'text-luxury-white'}`}>{slide.headline}</h2>}
+              {slide.subheading && <p className={`text-sm leading-relaxed ${light ? 'text-luxury-black/70' : 'text-luxury-white/70'}`}>{slide.subheading}</p>}
+              {slide.linkUrl && <a href={slide.linkUrl} className="mt-4 text-xs tracking-luxury uppercase border border-luxury-gold text-luxury-gold px-6 py-2 inline-block hover:bg-luxury-gold hover:text-luxury-black transition-all">Explore</a>}
+            </div>
+          )
+
         return (
-          <div key={`split-${i}`} className="grid grid-cols-2 h-[75vh]">
-            {imageLeft ? <>{imageSide}{productsSide}</> : <>{productsSide}{imageSide}</>}
+          <div key={`split-${i}`}>
+            {/* Mobile: image on top, content below */}
+            <div className="md:hidden">
+              {mobileImage}
+              {mobileProducts}
+            </div>
+            {/* Desktop: side-by-side */}
+            <div className="hidden md:grid md:grid-cols-2 md:h-[75vh]">
+              {imageLeft ? <>{imageSide}{productsSide}</> : <>{productsSide}{imageSide}</>}
+            </div>
           </div>
         )
       })}

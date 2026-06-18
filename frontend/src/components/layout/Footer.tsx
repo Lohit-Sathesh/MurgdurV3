@@ -16,18 +16,18 @@ export function Footer() {
   const footerStyle = useTextStyle('footer')
 
   return (
-    <footer className="bg-luxury-black border-t border-luxury-gray mt-32 py-16 px-8">
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-12" style={footerStyle}>
+    <footer className="bg-luxury-black border-t border-luxury-gray mt-16 md:mt-32 py-10 md:py-16 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-12" style={footerStyle}>
         {/* Brand column */}
         <div>
-          <p className="font-serif font-bold text-2xl tracking-luxury text-luxury-white mb-6">
+          <p className="font-serif font-bold text-lg sm:text-2xl tracking-[0.1em] sm:tracking-luxury text-luxury-white mb-4 sm:mb-6">
             {siteTitle}
           </p>
           <p className="text-luxury-muted text-xs leading-relaxed tracking-wide mb-6">
             {footerTagline}
           </p>
           <div className="mb-6">
-            <p className="text-xs uppercase tracking-[0.3em] text-luxury-gold mb-4">
+            <p className="text-xs uppercase tracking-[0.2em] sm:tracking-[0.3em] text-luxury-gold mb-4">
               Private Access
             </p>
             <NewsletterForm
@@ -64,7 +64,7 @@ export function Footer() {
       </div>
 
       {/* Footer note */}
-      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-luxury-gray text-center">
+      <div className="max-w-7xl mx-auto mt-8 md:mt-16 pt-6 md:pt-8 border-t border-luxury-gray text-center">
         <p className="text-luxury-muted text-xs tracking-luxury">{footerNote}</p>
       </div>
     </footer>

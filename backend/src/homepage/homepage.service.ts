@@ -11,4 +11,11 @@ export class HomepageService {
       orderBy: { sortOrder: 'asc' },
     })
   }
+
+  async getActiveBlocks() {
+    return this.prisma.homepageBlock.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    })
+  }
 }

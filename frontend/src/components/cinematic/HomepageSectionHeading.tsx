@@ -12,7 +12,7 @@ export function HomepageSectionHeading({ sec }: { sec: HomepageSection }) {
         <p className="text-luxury-gold uppercase tracking-[0.3em] text-xs mb-4">{sec.eyebrow}</p>
       )}
       {sec.headline && (
-        <h2 className="font-serif text-5xl text-luxury-white mb-4 whitespace-pre-line" style={headingStyle}>
+        <h2 className="font-serif text-3xl md:text-5xl text-luxury-white mb-4 whitespace-pre-line" style={headingStyle}>
           {sec.headline}
         </h2>
       )}

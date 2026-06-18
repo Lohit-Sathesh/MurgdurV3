@@ -120,8 +120,9 @@ export function CategoryDrawer({ categories, onClose }: { categories: Category[]
   const flyout1Ref = useRef<HTMLDivElement>(null)
   const flyout2Ref = useRef<HTMLDivElement>(null)
 
-  const [active, setActive] = useState<Category | null>(null)
-  const [activeSub, setActiveSub] = useState<Category | null>(null)
+  const [active,          setActive]          = useState<Category | null>(null)
+  const [activeSub,       setActiveSub]       = useState<Category | null>(null)
+  const [mobileExpanded,  setMobileExpanded]  = useState<string | null>(null) // mobile accordion
 
   useEffect(() => {
     gsap.set(navRef.current, { xPercent: -100 })
@@ -181,8 +182,8 @@ export function CategoryDrawer({ categories, onClose }: { categories: Category[]
       >
         {/* ── Left nav panel ── */}
         <div ref={navRef}
-          className="h-full w-72 bg-luxury-black border-r border-luxury-gray flex flex-col flex-shrink-0">
-          <div className="flex items-center justify-between px-8 h-20 border-b border-luxury-gray flex-shrink-0">
+          className="h-full w-64 sm:w-72 bg-luxury-black border-r border-luxury-gray flex flex-col flex-shrink-0">
+          <div className="flex items-center justify-between px-4 sm:px-8 h-16 sm:h-20 border-b border-luxury-gray flex-shrink-0">
             <Link href="/" onClick={handleClose}
               className="font-serif font-bold text-xl tracking-luxury text-luxury-white hover:text-luxury-gold transition-colors">
               {siteTitle}
@@ -192,37 +193,69 @@ export function CategoryDrawer({ categories, onClose }: { categories: Category[]
               <X className="w-5 h-5" />
             </button>
           </div>
-          <nav className="flex-1 overflow-y-auto px-8 py-10">
+          <nav className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-10">
             {categories.map(cat => {
-              const hasChildren = !!cat.children?.length
-              const isActive = active?.id === cat.id
-              return hasChildren ? (
-                <button key={cat.id}
-                  onMouseEnter={() => hoverTop(cat)}
-                  onClick={() => hoverTop(cat)}
-                  className={`w-full flex items-center justify-between py-4 border-b border-luxury-gray/40 text-left transition-colors duration-200 ${
-                    isActive ? 'text-luxury-gold' : 'text-luxury-white hover:text-luxury-gold'
-                  }`}>
-                  <span className="text-base tracking-wide">{cat.name}</span>
-                  <ChevronRight className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
-                    isActive ? 'text-luxury-gold translate-x-0.5' : 'text-luxury-muted'
-                  }`} />
-                </button>
-              ) : (
-                <Link key={cat.id} href={`/collections/${cat.slug}`} onClick={handleClose}
-                  onMouseEnter={() => hoverTop(cat)}
-                  className="block py-4 border-b border-luxury-gray/40 text-base tracking-wide text-luxury-white hover:text-luxury-gold transition-colors duration-200">
-                  {cat.name}
-                </Link>
+              const hasChildren   = !!cat.children?.length
+              const isActive      = active?.id === cat.id
+              const isMobileOpen  = mobileExpanded === cat.id
+
+              return (
+                <div key={cat.id}>
+                  {hasChildren ? (
+                    <button
+                      onMouseEnter={() => hoverTop(cat)}
+                      onClick={() => {
+                        hoverTop(cat)
+                        // Mobile: toggle accordion
+                        setMobileExpanded(prev => prev === cat.id ? null : cat.id)
+                      }}
+                      className={`w-full flex items-center justify-between py-4 border-b border-luxury-gray/40 text-left transition-colors duration-200 ${
+                        isActive ? 'text-luxury-gold' : 'text-luxury-white hover:text-luxury-gold'
+                      }`}>
+                      <span className="text-base tracking-wide">{cat.name}</span>
+                      <ChevronRight className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${
+                        isActive ? 'text-luxury-gold translate-x-0.5' : 'text-luxury-muted'
+                      } ${isMobileOpen ? 'md:rotate-0 rotate-90' : ''}`} />
+                    </button>
+                  ) : (
+                    <Link href={`/collections/${cat.slug}`} onClick={handleClose}
+                      onMouseEnter={() => hoverTop(cat)}
+                      className="block py-4 border-b border-luxury-gray/40 text-base tracking-wide text-luxury-white hover:text-luxury-gold transition-colors duration-200">
+                      {cat.name}
+                    </Link>
+                  )}
+
+                  {/* Mobile accordion — subcategories inline, hidden on md+ (flyout handles it there) */}
+                  {hasChildren && isMobileOpen && (
+                    <div className="md:hidden pl-4 pb-2 border-b border-luxury-gray/40">
+                      {cat.children!.map(child => (
+                        <div key={child.id}>
+                          <Link href={`/collections/${child.slug}`} onClick={handleClose}
+                            className="flex items-center justify-between py-3 text-sm tracking-wide text-luxury-muted hover:text-luxury-gold transition-colors">
+                            {child.name}
+                            {child.children?.length ? <ChevronRight className="w-3 h-3 shrink-0" /> : null}
+                          </Link>
+                          {/* Level 2 children */}
+                          {child.children?.map(grandchild => (
+                            <Link key={grandchild.id} href={`/collections/${grandchild.slug}`} onClick={handleClose}
+                              className="block py-2 pl-4 text-xs tracking-wide text-luxury-muted/70 hover:text-luxury-gold transition-colors">
+                              {grandchild.name}
+                            </Link>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )
             })}
           </nav>
         </div>
 
-        {/* ── Level-1 flyout: children of hovered top-level category ── */}
+        {/* ── Level-1 flyout: desktop only — mobile uses inline accordion above ── */}
         {active && (
           <div ref={flyout1Ref}
-            className="h-full w-80 bg-luxury-black border-r border-luxury-gray flex flex-col flex-shrink-0 overflow-hidden">
+            className="hidden md:flex h-full w-80 bg-luxury-black border-r border-luxury-gray flex-col flex-shrink-0 overflow-hidden">
             <div className="flex items-center px-8 h-20 border-b border-luxury-gray flex-shrink-0">
               <span className="font-serif text-lg tracking-luxury text-luxury-gold uppercase">
                 {active.name}
@@ -237,10 +270,10 @@ export function CategoryDrawer({ categories, onClose }: { categories: Category[]
           </div>
         )}
 
-        {/* ── Level-2 flyout: sub-subcategories (e.g. Shirts inside Ready to Wear) ── */}
+        {/* ── Level-2 flyout: desktop only ── */}
         {activeSub && (
           <div ref={flyout2Ref}
-            className="h-full w-80 bg-luxury-black border-r border-luxury-gray flex flex-col flex-shrink-0 overflow-hidden">
+            className="hidden md:flex h-full w-80 bg-luxury-black border-r border-luxury-gray flex-col flex-shrink-0 overflow-hidden">
             <div className="flex items-center px-8 h-20 border-b border-luxury-gray flex-shrink-0">
               <span className="font-serif text-lg tracking-luxury text-luxury-gold uppercase">
                 {activeSub.name}

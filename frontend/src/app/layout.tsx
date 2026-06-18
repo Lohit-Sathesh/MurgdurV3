@@ -71,8 +71,11 @@ function buildCss(config: any): string {
     // :root body * has specificity 0-1-1 which beats Tailwind class selectors (0-1-0),
     // ensuring the global font and weight truly apply to every visible text element.
     lines.push(`:root body *{font-family:${family};font-weight:${weight};}`)
-    // html font-size enables proportional rem scaling across all Tailwind text utilities
-    lines.push(`html{font-size:${size};}`)
+    // Use clamp() so the global font size scales from mobile to desktop
+    // At 375px: ~87.5% of configured size; at 1440px: 100%
+    const pxVal   = parseFloat(size)
+    const minSize = Math.max(14, Math.round(pxVal * 0.875))
+    lines.push(`html{font-size:clamp(${minSize}px,${(pxVal/1440*100).toFixed(2)}vw + ${minSize * 0.1}px,${size});}`)
     lines.push(`body{font-style:${style};}`)
   }
 

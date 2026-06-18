@@ -52,15 +52,17 @@ export function SearchOverlay({ onClose }: { onClose: () => void }) {
                 id: p.id,
                 name: p.name,
                 slug: p.slug,
-                sku: '',
+                sku: p.sku ?? '',
                 description: '',
                 price: String(p.price),
                 comparePrice: null,
                 currency: 'INR',
                 material: null,
                 images: p.image ? [{ id: p.id, url: p.image, altText: null, sortOrder: 0, isVideo: false, variantId: null }] : [],
-                variants: [],
-                category: { id: p.categoryId, name: '', slug: '' },
+                // null = no variant/stock data from Meilisearch index.
+                // ProductCard skips stock badges when variants is null.
+                variants: null as any,
+                category: { id: p.categoryId ?? '', name: '', slug: '' },
               }} />
             ))}
           </div>

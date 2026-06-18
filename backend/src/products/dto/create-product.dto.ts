@@ -14,6 +14,7 @@ export class CreateProductDto {
   @IsNumber() @Min(0) price!: number
   @IsUUID() categoryId!: string
   @IsOptional() @IsString() slug?: string
+  @IsOptional() @IsString() sizeGuideId?: string | null
   @IsOptional() @IsString() material?: string
   @IsOptional() @IsBoolean() isFeatured?: boolean
   @IsOptional() @IsNumber() comparePrice?: number

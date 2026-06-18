@@ -6,7 +6,8 @@ export class HomepageController {
   constructor(private homepage: HomepageService) {}
 
   @Get('slides')
-  getSlides() {
-    return this.homepage.getActiveSlides()
-  }
+  getSlides() { return this.homepage.getActiveSlides() }
+
+  @Get('blocks')
+  getBlocks() { return this.homepage.getActiveBlocks() }
 }

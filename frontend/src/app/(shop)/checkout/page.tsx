@@ -105,8 +105,8 @@ export default function CheckoutPage() {
   if (!loaded) return null
 
   return (
-    <div className="max-w-4xl mx-auto px-8 py-16">
-      <h1 className="font-serif text-4xl tracking-luxury text-luxury-white mb-12">Checkout</h1>
+    <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-16">
+      <h1 className="font-serif text-2xl md:text-4xl tracking-luxury text-luxury-white mb-8 md:mb-12">Checkout</h1>
 
       <div className="space-y-12">
         {/* Address */}

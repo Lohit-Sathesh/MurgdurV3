@@ -54,7 +54,7 @@ export function Navbar() {
     ? 'bg-luxury-black/80 backdrop-blur-xl border-b border-luxury-gray shadow-lg'
     : 'bg-transparent'
 }`}>
-        <div className="max-w-7xl mx-auto px-8 h-20 grid grid-cols-3 items-center">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 md:h-20 grid grid-cols-3 items-center">
           <div className="flex items-center justify-start">
             <button onClick={() => setMenuOpen(true)} aria-label="Open menu"
               className={`${textClass} hover:text-luxury-gold transition-colors`}>
@@ -63,42 +63,46 @@ export function Navbar() {
           </div>
 
           <Link href="/" className="text-center group">
-  <div className={`font-serif font-bold text-3xl tracking-[0.25em] group-hover:text-luxury-gold transition-all duration-500 ${textClass}`}
+  <div className={`font-serif font-bold text-base sm:text-xl md:text-3xl tracking-[0.08em] sm:tracking-[0.15em] md:tracking-[0.25em] group-hover:text-luxury-gold transition-all duration-500 ${textClass}`}
     style={navTitleStyle}>
     {siteTitle}
   </div>
 
-  <div className={`text-[10px] uppercase tracking-[0.3em] mt-1 ${light ? 'text-luxury-black/60' : 'text-luxury-muted'}`}
+  <div className={`hidden sm:block text-[9px] md:text-[10px] uppercase tracking-[0.2em] md:tracking-[0.3em] mt-0.5 ${light ? 'text-luxury-black/60' : 'text-luxury-muted'}`}
     style={navMottoStyle}>
     {siteMotto}
   </div>
 </Link>
 
-          <div className="flex items-center justify-end gap-6">
+          <div className="flex items-center justify-end gap-3 md:gap-6">
             <button onClick={() => setSearchOpen(true)} aria-label="Search"
               className={`${textClass} hover:text-luxury-gold transition-colors`}>
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 md:w-5 md:h-5" />
             </button>
-            <CurrencySwitcher textClass={textClass} />
+            {/* Currency switcher — hidden on mobile to save space */}
+            <span className="hidden md:block">
+              <CurrencySwitcher textClass={textClass} />
+            </span>
             {session
               ? <>
                   <Link href="/profile" aria-label="Account" className={`${textClass} hover:text-luxury-gold transition-colors`}>
-                    <User className="w-5 h-5" />
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
                   </Link>
+                  {/* Logout hidden on mobile — accessible via profile page */}
                   <button onClick={() => signOut({ callbackUrl: '/' })} aria-label="Logout"
-                    className={`${textClass} hover:text-luxury-gold transition-colors`}>
+                    className={`hidden md:block ${textClass} hover:text-luxury-gold transition-colors`}>
                     <LogOut className="w-5 h-5" />
                   </button>
                 </>
               : <Link href="/login" aria-label="Sign In" className={`${textClass} hover:text-luxury-gold transition-colors`}>
-                  <User className="w-5 h-5" />
+                  <User className="w-4 h-4 md:w-5 md:h-5" />
                 </Link>
             }
             <button onClick={openCart} aria-label="Bag"
               className={`relative ${textClass} hover:text-luxury-gold transition-colors`}>
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-4 h-4 md:w-5 md:h-5" />
               {items.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-xs w-4 h-4 rounded-full flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-luxury-gold text-luxury-black text-[10px] w-3.5 h-3.5 md:w-4 md:h-4 rounded-full flex items-center justify-center">
                   {items.length}
                 </span>
               )}

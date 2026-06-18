@@ -65,7 +65,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-luxury-black flex items-center justify-center px-4 py-24">
       <div className="w-full max-w-md">
-        <h1 className="font-serif text-4xl tracking-luxury text-luxury-white text-center mb-12">Create Account</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl tracking-[0.1em] sm:tracking-luxury text-luxury-white text-center mb-8 md:mb-12">Create Account</h1>
         <div className="space-y-5">
           {/* Google sign up — only when NEXT_PUBLIC_GOOGLE_ENABLED=true */}
           {googleEnabled && (
@@ -88,7 +88,7 @@ export default function RegisterPage() {
             </>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <Input label="First Name" value={form.firstName} onChange={update('firstName')} />
             <Input label="Last Name"  value={form.lastName}  onChange={update('lastName')}  />
           </div>

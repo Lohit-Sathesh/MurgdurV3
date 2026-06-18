@@ -86,18 +86,18 @@ export function ScrollGallery({ slides }: { slides: HeroSlide[] }) {
 
             <div className={`scroll-text absolute inset-0 flex flex-col ${positionClasses((slide as any).textPosition)}`}>
               {slide.subheading && (
-                <p className="text-luxury-gold text-xs tracking-luxury uppercase mb-6"
+                <p className="text-luxury-gold text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-luxury uppercase mb-3 sm:mb-6"
                   style={galleryStyle}>{slide.subheading}</p>
               )}
               {slide.headline && (
-                <h2 className={`font-serif text-5xl md:text-7xl tracking-luxury mb-10 ${light ? 'text-luxury-black' : 'text-luxury-white'}`}
+                <h2 className={`font-serif text-xl sm:text-3xl md:text-5xl lg:text-7xl tracking-[0.08em] sm:tracking-luxury mb-4 md:mb-10 ${light ? 'text-luxury-black' : 'text-luxury-white'}`}
                   style={galleryStyle}>
                   {slide.headline}
                 </h2>
               )}
               {slide.linkUrl && (
                 <Link href={slide.linkUrl}
-                  className={`border text-xs tracking-luxury uppercase px-10 py-4 transition-all duration-500 ${
+                  className={`border text-[10px] sm:text-xs tracking-[0.1em] sm:tracking-luxury uppercase px-4 sm:px-6 py-2.5 md:px-10 md:py-4 transition-all duration-500 ${
                     light
                       ? 'border-luxury-black text-luxury-black hover:bg-luxury-black hover:text-luxury-white'
                       : 'border-luxury-white text-luxury-white hover:bg-luxury-white hover:text-luxury-black'
