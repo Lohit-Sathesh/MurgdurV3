@@ -197,7 +197,15 @@ export function buildTextStyle(s: TextStyle | undefined): React.CSSProperties {
 
   const family = FONT_MAP[s.fontFamily ?? 'default'] ?? ''
   if (family) css.fontFamily = family
-  if ((s.fontSize ?? 0) > 0) css.fontSize = `${s.fontSize}px`
+  if ((s.fontSize ?? 0) > 0) {
+    const px = s.fontSize
+    // clamp() ensures the admin-configured size only applies at desktop width
+    // and scales down proportionally so it never overflows small screens.
+    // At 375px (iPhone SE): ~35% of target. At 1440px: 100% of target.
+    const minPx = Math.max(14, Math.round(px * 0.35))
+    const vw    = (px / 1440 * 100).toFixed(2)
+    css.fontSize = `clamp(${minPx}px, ${vw}vw, ${px}px)`
+  }
   if (s.fontWeight) css.fontWeight = s.fontWeight
   if ((s.letterSpacing ?? 0) !== 0) css.letterSpacing = `${s.letterSpacing}em`
   if (s.color) css.color = s.color

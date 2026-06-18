@@ -13,8 +13,11 @@ import { useTextStyle } from '@/context/SiteConfigContext'
 const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000
 
 export function ProductCard({ product, onClick, onWishlistChange }: { product: Product; onClick?: () => void; onWishlistChange?: (productId: string, inWishlist: boolean) => void }) {
-  const cardStyle  = useTextStyle('productCard')
-  const totalStock = product.variants?.reduce((s, v) => s + v.stock, 0) ?? 1
+  const cardStyle       = useTextStyle('productCard')
+  // null variants = no stock data (e.g. search results) → hide all stock badges
+  // []   variants = product has no variants defined   → treat as out of stock
+  const hasVariantData  = product.variants != null
+  const totalStock      = hasVariantData ? product.variants!.reduce((s, v) => s + v.stock, 0) : null
   const { isInWishlist, toggle } = useWishlist()
   const { isLoggedIn } = useAuth()
   const router = useRouter()
@@ -58,8 +61,8 @@ export function ProductCard({ product, onClick, onWishlistChange }: { product: P
         )}
         <div className="absolute top-3 left-3 space-y-1">
           {isNew && <Badge variant="new">New</Badge>}
-          {totalStock === 0 && <Badge variant="out-of-stock">Out of Stock</Badge>}
-          {totalStock > 0 && totalStock < 10 && <Badge variant="low-stock">Low Stock</Badge>}
+          {hasVariantData && totalStock === 0 && <Badge variant="out-of-stock">Out of Stock</Badge>}
+          {hasVariantData && totalStock !== null && totalStock > 0 && totalStock < 10 && <Badge variant="low-stock">Low Stock</Badge>}
         </div>
         <button onClick={handleWishlistClick} aria-label="Toggle wishlist"
           className="absolute top-3 right-3 p-2 rounded-full bg-luxury-black/40 backdrop-blur-sm hover:bg-luxury-black/70 transition-colors">

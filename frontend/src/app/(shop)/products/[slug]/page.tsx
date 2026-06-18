@@ -23,7 +23,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   return (
     <div>
       {/* Back button sits above the full-bleed grid */}
-      <div className="px-8 pt-8 pb-4">
+      <div className="px-4 md:px-8 pt-6 md:pt-8 pb-4">
         <BackButton />
       </div>
       <ProductView product={product} />

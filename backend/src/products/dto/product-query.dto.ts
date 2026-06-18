@@ -2,6 +2,8 @@
 import { Transform, Type } from 'class-transformer'
 
 export class ProductQueryDto {
+  @IsOptional() @IsString() q?: string           // text search on name/sku
+  @IsOptional() @IsString() ids?: string         // comma-separated product IDs
   @IsOptional() @IsString() category?: string
   @IsOptional() @Transform(({ value }) => value === 'true') @IsBoolean() featured?: boolean
   @IsOptional() @Transform(({ value }) => value === 'true') @IsBoolean() newArrivals?: boolean

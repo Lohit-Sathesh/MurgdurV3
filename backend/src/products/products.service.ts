@@ -23,6 +23,20 @@ export class ProductsService {
     const where: any = { isActive: true }
     let categoryInfo: { id: string; name: string; slug: string; description: string | null; imageUrl: string | null; highlights: any[]; pageType: string; infoBlocks: any[] } | null = null
 
+    // Filter by specific IDs (used by homepage product blocks)
+    if (query.ids) {
+      const idList = query.ids.split(',').map(id => id.trim()).filter(Boolean)
+      if (idList.length) where.id = { in: idList }
+    }
+
+    // Text search by name or SKU
+    if (query.q) {
+      where.OR = [
+        { name: { contains: query.q, mode: 'insensitive' } },
+        { sku:  { contains: query.q, mode: 'insensitive' } },
+      ]
+    }
+
     if (query.category) {
       const cat = await this.prisma.category.findUnique({
         where: { slug: query.category },

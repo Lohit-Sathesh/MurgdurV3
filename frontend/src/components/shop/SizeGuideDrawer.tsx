@@ -115,7 +115,7 @@ export function SizeGuideDrawer({ guide, isOpen, onClose }: Props) {
                     ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-6 border-b border-luxury-gray flex-shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-8 py-4 sm:py-6 border-b border-luxury-gray flex-shrink-0">
           <div>
             <p className="text-luxury-muted text-[10px] tracking-luxury uppercase mb-0.5">Size Guide</p>
             <h2 className="font-serif text-xl tracking-luxury text-luxury-white">
@@ -129,7 +129,7 @@ export function SizeGuideDrawer({ guide, isOpen, onClose }: Props) {
         </div>
 
         {/* Content — scrollable */}
-        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
           {guide?.blocks.map((block, i) => (
             <div key={block.id ?? i}>
               {block.type === 'image' && <ImageBlock block={block} />}

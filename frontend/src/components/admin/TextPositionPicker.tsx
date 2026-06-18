@@ -46,10 +46,10 @@ export function TextPositionPicker({
 /** Convert DB textPosition → Tailwind classes for the text overlay container */
 export function positionClasses(pos?: string | null): string {
   switch (pos) {
-    case 'top-left':     return 'items-start  justify-start  text-left   pt-28 pl-16 pb-8 pr-8'
-    case 'top-right':    return 'items-end    justify-start  text-right  pt-28 pr-16 pb-8 pl-8'
-    case 'bottom-left':  return 'items-start  justify-end    text-left   pb-20 pl-16 pt-8 pr-8'
-    case 'bottom-right': return 'items-end    justify-end    text-right  pb-20 pr-16 pt-8 pl-8'
-    default:             return 'items-center justify-center text-center px-8'  // 'center'
+    case 'top-left':     return 'items-center sm:items-start  justify-center sm:justify-start  text-center sm:text-left   pt-16 sm:pt-28 px-6 sm:pl-16 sm:pr-8'
+    case 'top-right':    return 'items-center sm:items-end    justify-center sm:justify-start  text-center sm:text-right  pt-16 sm:pt-28 px-6 sm:pr-16 sm:pl-8'
+    case 'bottom-left':  return 'items-center sm:items-start  justify-end                      text-center sm:text-left   pb-16 sm:pb-20 px-6 sm:pl-16 sm:pr-8'
+    case 'bottom-right': return 'items-center sm:items-end    justify-end                      text-center sm:text-right  pb-16 sm:pb-20 px-6 sm:pr-16 sm:pl-8'
+    default:             return 'items-center justify-center text-center px-6 md:px-8'  // 'center'
   }
 }

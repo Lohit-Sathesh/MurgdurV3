@@ -35,9 +35,9 @@ export function CartDrawer() {
     <>
       {isOpen && <div onClick={closeCart} className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />}
       <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-luxury-black border-l border-luxury-gray z-50 transform transition-transform duration-500 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex flex-col h-full p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="font-serif text-2xl tracking-luxury text-luxury-white">Shopping Bag</h2>
+        <div className="flex flex-col h-full p-4 sm:p-8">
+          <div className="flex justify-between items-center mb-6 sm:mb-8">
+            <h2 className="font-serif text-lg sm:text-2xl tracking-[0.1em] sm:tracking-luxury text-luxury-white">Shopping Bag</h2>
             <div className="flex items-center gap-4">
               {items.length > 0 && (
                 <button onClick={() => { clearCart(); }} className="text-luxury-muted text-xs tracking-luxury uppercase hover:text-red-400 transition-colors">
@@ -51,8 +51,8 @@ export function CartDrawer() {
             {items.length === 0
               ? <p className="text-luxury-muted tracking-wide text-sm text-center pt-12">Your bag is empty</p>
               : items.map(item => (
-                <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">
-                  <div className="relative w-16 h-20 shrink-0">
+                <div key={`${item.productId}-${item.variantId}`} className="flex gap-3">
+                  <div className="relative w-14 sm:w-16 h-18 sm:h-20 shrink-0">
                     <Image src={item.image} alt={item.name} fill className="object-cover" />
                   </div>
                   <div className="flex-1">
