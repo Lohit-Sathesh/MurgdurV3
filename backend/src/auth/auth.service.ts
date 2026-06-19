@@ -14,7 +14,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name)
 
   private readonly MAX_LOGIN_ATTEMPTS = 5
-  private readonly LOGIN_LOCKOUT_SECONDS = 15 * 60
+  private readonly LOGIN_LOCKOUT_SECONDS = 5 * 60 // 5-minute temporary block
 
   constructor(
     private prisma: PrismaService,
@@ -90,11 +90,26 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, ip: string) {
-    const lockKey = `login_attempts:${ip}:${dto.email.toLowerCase()}`
+    const email   = dto.email.toLowerCase()
+    const ipKey   = `login_lock:ip:${ip}`
+    const emailKey = `login_lock:email:${email}`
 
-    const attempts = await this.redis.get(lockKey)
-    if (attempts && parseInt(attempts) >= this.MAX_LOGIN_ATTEMPTS) {
-      const retryAfter = await this.redis.ttl(lockKey)
+    // Check both IP block and account block independently
+    const [ipAttempts, emailAttempts] = await Promise.all([
+      this.redis.get(ipKey),
+      this.redis.get(emailKey),
+    ])
+
+    if (ipAttempts && parseInt(ipAttempts) >= this.MAX_LOGIN_ATTEMPTS) {
+      const retryAfter = await this.redis.ttl(ipKey)
+      throw new HttpException(
+        `Too many failed login attempts. Please try again in ${Math.ceil(retryAfter / 60)} minute(s).`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      )
+    }
+
+    if (emailAttempts && parseInt(emailAttempts) >= this.MAX_LOGIN_ATTEMPTS) {
+      const retryAfter = await this.redis.ttl(emailKey)
       throw new HttpException(
         `Too many failed login attempts. Please try again in ${Math.ceil(retryAfter / 60)} minute(s).`,
         HttpStatus.TOO_MANY_REQUESTS,
@@ -105,11 +120,19 @@ export class AuthService {
     const valid = user?.passwordHash ? await bcrypt.compare(dto.password, user.passwordHash) : false
 
     if (!user || !valid) {
-      await this.redis.incrWithExpiry(lockKey, this.LOGIN_LOCKOUT_SECONDS)
+      // Increment both counters — only set TTL on first increment
+      await Promise.all([
+        this.redis.incrWithExpiry(ipKey, this.LOGIN_LOCKOUT_SECONDS),
+        this.redis.incrWithExpiry(emailKey, this.LOGIN_LOCKOUT_SECONDS),
+      ])
       throw new UnauthorizedException('Invalid credentials')
     }
 
-    await this.redis.del(lockKey)
+    // Reset both counters on successful login
+    await Promise.all([
+      this.redis.del(ipKey),
+      this.redis.del(emailKey),
+    ])
     return this.generateTokens(user)
   }
 
