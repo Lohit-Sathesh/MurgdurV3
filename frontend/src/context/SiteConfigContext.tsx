@@ -104,6 +104,10 @@ export interface SiteConfig {
   whatsappImageUrl:        string
   invoiceEmailSubject:     string
   invoiceEmailBody:        string
+  invoiceLogoUrl:          string
+  invoiceCompanyName:      string
+  invoiceCompanyAddress:   string
+  invoiceFooterText:       string
 }
 
 const DEFAULT_FOOTER_COLUMNS: FooterColumn[] = [
@@ -151,6 +155,10 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   whatsappImageUrl:        '',
   invoiceEmailSubject:     '',
   invoiceEmailBody:        '',
+  invoiceLogoUrl:          '',
+  invoiceCompanyName:      'Murgdur',
+  invoiceCompanyAddress:   '',
+  invoiceFooterText:       'Thank you for shopping with Murgdur!',
   buttons: [
     { id: 'hero_explore',   label: 'Explore',                href: '/collections/new-arrivals' },
     { id: 'editorial_cta',  label: 'Explore the Collection', href: '/collections/new-arrivals' },
@@ -170,9 +178,9 @@ export function buildConfigCss(config: Partial<SiteConfig>): string {
   const style  =  config.fontStyle    ?? 'normal'
   if (family) {
     lines.push(`html{--font-serif:${family};--font-sans:${family};}`)
-    lines.push(`:root body *{font-family:${family};font-weight:${weight};}`)
+    lines.push(`:root body *{font-family:${family};}`)
     lines.push(`html{font-size:${size};}`)
-    lines.push(`body{font-style:${style};}`)
+    lines.push(`body{font-weight:${weight};font-style:${style};}`)
   }
 
   const DEFAULTS: Record<string, string> = { colorGold: '#c9a96e', colorText: '#1a1a1a', colorBg: '#ffffff', colorMuted: '#6f6c64' }

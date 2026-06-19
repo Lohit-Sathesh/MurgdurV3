@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import PDFDocument = require('pdfkit');
+import * as https from 'https';
+import * as http  from 'http';
 
 @Injectable()
 export class InvoiceService {
@@ -127,15 +129,34 @@ export class InvoiceService {
   /**
    * Generate invoice as PDF
    */
-  async generateInvoicePdf(orderId: string): Promise<Buffer> {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: { items: true, user: true, address: true },
-    });
+  /** Download a remote image URL into a Buffer (for logo in PDF) */
+  private fetchImage(url: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const proto = url.startsWith('https') ? https : http
+      proto.get(url, res => {
+        const chunks: Buffer[] = []
+        res.on('data', c => chunks.push(c))
+        res.on('end', () => resolve(Buffer.concat(chunks)))
+        res.on('error', reject)
+      }).on('error', reject)
+    })
+  }
 
-    if (!order) {
-      throw new Error('Order not found');
-    }
+  async generateInvoicePdf(orderId: string): Promise<Buffer> {
+    const [order, cfg] = await Promise.all([
+      this.prisma.order.findUnique({
+        where:   { id: orderId },
+        include: { items: true, user: true, address: true },
+      }),
+      this.prisma.siteConfig.findUnique({ where: { id: 'main' } }),
+    ])
+
+    if (!order) throw new Error('Order not found')
+
+    const companyName    = (cfg?.invoiceCompanyName    as string) || 'Murgdur'
+    const companyAddress = (cfg?.invoiceCompanyAddress as string) || ''
+    const footerText     = (cfg?.invoiceFooterText     as string) || 'Thank you for shopping with Murgdur!'
+    const logoUrl        = (cfg?.invoiceLogoUrl        as string) || ''
 
     const doc = new PDFDocument({ margin: 50 });
     const chunks: Buffer[] = [];
@@ -144,8 +165,18 @@ export class InvoiceService {
       doc.on('end', () => resolve(Buffer.concat(chunks)));
     });
 
-    doc.fontSize(20).text('MURGDUR', { align: 'left' });
-    doc.fontSize(10).text('Luxury e-commerce platform');
+    // ── Logo ──
+    if (logoUrl) {
+      try {
+        const logoBuffer = await this.fetchImage(logoUrl)
+        doc.image(logoBuffer, 50, 45, { width: 80, height: 40, fit: [80, 40] })
+        doc.moveDown(2)
+      } catch {}
+    }
+
+    doc.fontSize(20).text(companyName, { align: 'left' });
+    if (companyAddress) doc.fontSize(9).text(companyAddress, { align: 'left' })
+    doc.fontSize(10).text('Luxury fashion. Crafted for the extraordinary.');
     doc.moveDown();
 
     doc.fontSize(14).text('INVOICE', { align: 'right' });
@@ -191,7 +222,7 @@ export class InvoiceService {
     doc.fontSize(12).text(`Total: Rs. ${Number(order.total).toFixed(2)}`, { align: 'right' });
 
     doc.moveDown(2);
-    doc.fontSize(9).font('Helvetica').text('Thank you for shopping with Murgdur!', { align: 'center' });
+    doc.fontSize(9).font('Helvetica').text(footerText, { align: 'center' });
 
     doc.end();
     return done;

@@ -123,6 +123,10 @@ export class SiteConfigService {
     whatsappImageUrl?:        string
     invoiceEmailSubject?:     string
     invoiceEmailBody?:        string
+    invoiceLogoUrl?:          string
+    invoiceCompanyName?:      string
+    invoiceCompanyAddress?:   string
+    invoiceFooterText?:       string
   }) {
     return this.prisma.siteConfig.upsert({
       where:  { id: 'main' },

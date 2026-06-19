@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Input }     from '@/components/ui/Input'
 import { Button }    from '@/components/ui/Button'
 import { PhoneInput } from '@/components/ui/PhoneInput'
+import { OtpVerifyField } from '@/components/auth/OtpVerifyField'
 import { api }       from '@/lib/api'
 import Link          from 'next/link'
 import { useAuth }   from '@/hooks/useAuth'
@@ -14,8 +15,9 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default function RegisterPage() {
   const router = useRouter()
   const { isLoggedIn, isLoading } = useAuth()
-  const [form, setForm]         = useState({ firstName: '', lastName: '', email: '', phone: '', password: '' })
-  const [phoneValid, setPhoneValid] = useState(true)
+  const [form, setForm]           = useState({ firstName: '', lastName: '', email: '', phone: '', password: '' })
+  const [emailVerified, setEmailVerified] = useState(false)
+  const [phoneValid,    setPhoneValid]    = useState(true)
   const [error,    setError]    = useState('')
   const [loading,  setLoading]  = useState(false)
   const [gLoading, setGLoading] = useState(false)
@@ -25,10 +27,16 @@ export default function RegisterPage() {
   }, [isLoading, isLoggedIn, router])
 
   const emailValid = EMAIL_REGEX.test(form.email)
-  const canSubmit  = form.firstName && form.lastName && emailValid && form.password.length >= 8 && phoneValid
+  // Can submit only when email is verified
+  const canSubmit  = form.firstName && form.lastName && emailValid && emailVerified &&
+                     form.password.length >= 8 && phoneValid
 
   function update(field: string) {
-    return (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [field]: e.target.value }))
+    return (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value
+      setForm(f => ({ ...f, [field]: value }))
+      if (field === 'email') setEmailVerified(false)
+    }
   }
 
   function onPhoneChange(full: string, valid: boolean) {
@@ -54,7 +62,6 @@ export default function RegisterPage() {
   }
 
   const googleEnabled = process.env.NEXT_PUBLIC_GOOGLE_ENABLED === 'true'
-
   async function handleGoogle() {
     setGLoading(true)
     await signIn('google', { callbackUrl: '/' })
@@ -65,9 +72,10 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-luxury-black flex items-center justify-center px-4 py-24">
       <div className="w-full max-w-md">
-        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl tracking-[0.1em] sm:tracking-luxury text-luxury-white text-center mb-8 md:mb-12">Create Account</h1>
+        <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl tracking-[0.1em] sm:tracking-luxury text-luxury-white text-center mb-12">
+          Create Account
+        </h1>
         <div className="space-y-5">
-          {/* Google sign up — only when NEXT_PUBLIC_GOOGLE_ENABLED=true */}
           {googleEnabled && (
             <>
               <button onClick={handleGoogle} disabled={gLoading}
@@ -92,16 +100,38 @@ export default function RegisterPage() {
             <Input label="First Name" value={form.firstName} onChange={update('firstName')} />
             <Input label="Last Name"  value={form.lastName}  onChange={update('lastName')}  />
           </div>
-          <Input label="Email" type="email" value={form.email} onChange={update('email')}
-            error={form.email && !emailValid ? 'Enter a valid email address' : undefined} />
+
+          {/* Email + OTP verification */}
+          <div className="space-y-2">
+            <Input label="Email" type="email" value={form.email} onChange={update('email')}
+              error={form.email && !emailValid ? 'Enter a valid email address' : undefined} />
+            <OtpVerifyField
+              identifier={form.email}
+              purpose="email"
+              valid={emailValid}
+              verified={emailVerified}
+              onVerifiedChange={setEmailVerified}
+            />
+          </div>
+
+          {/* Phone — no OTP, just country code + length validation */}
           <PhoneInput label="Phone (optional)" value={form.phone} onChange={onPhoneChange} />
+
           <Input label="Password" type="password" value={form.password} onChange={update('password')}
             error={form.password && form.password.length < 8 ? 'At least 8 characters' : undefined} />
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
+
           <Button onClick={handleSubmit} loading={loading} fullWidth disabled={!canSubmit}>
             Create Account
           </Button>
+
+          {!emailVerified && emailValid && (
+            <p className="text-luxury-muted text-xs text-center tracking-luxury">
+              Please verify your email address above before creating your account.
+            </p>
+          )}
+
           <p className="text-luxury-muted text-center text-sm tracking-wide">
             Already have an account?{' '}
             <Link href="/login" className="text-luxury-gold hover:underline">Sign in</Link>

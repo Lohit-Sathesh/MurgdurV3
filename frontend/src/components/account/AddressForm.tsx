@@ -40,6 +40,11 @@ export function AddressForm({ address, onSaved, onCancel }: Props) {
     setPhoneValid(valid || full === '' || full.length <= 3)
   }
 
+  // Auto-fill country from the phone country code selection
+  function onCountryChange(countryName: string) {
+    setForm(f => ({ ...f, country: countryName }))
+  }
+
   async function handleSubmit() {
     if (form.phone && !phoneValid) { setError('Please enter a valid phone number.'); return }
     setLoading(true); setError('')
@@ -72,10 +77,13 @@ export function AddressForm({ address, onSaved, onCancel }: Props) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Input label="Postal Code" value={form.postalCode} onChange={update('postalCode')} />
-        <Input label="Country"     value={form.country}    onChange={update('country')}    />
+        {/* Country auto-fills when phone country code is selected; still manually editable */}
+        <Input label="Country" value={form.country} onChange={update('country')} />
       </div>
 
-      <PhoneInput label="Phone" value={form.phone} onChange={onPhoneChange} />
+      <PhoneInput label="Phone" value={form.phone}
+        onChange={onPhoneChange}
+        onCountryChange={onCountryChange} />
 
       <label className="flex items-center gap-2 text-sm text-luxury-muted tracking-wide cursor-pointer">
         <input type="checkbox" checked={form.isDefault}

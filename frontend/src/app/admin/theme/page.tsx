@@ -250,10 +250,13 @@ export default function ThemePage() {
   const [taxLabel,             setTaxLabel]             = useState(DEFAULT_SITE_CONFIG.taxLabel)
   const [whatsappNumber,           setWhatsappNumber]          = useState(DEFAULT_SITE_CONFIG.whatsappNumber)
   const [whatsappMessageTemplate,  setWhatsappMessageTemplate]  = useState(DEFAULT_SITE_CONFIG.whatsappMessageTemplate)
-  const [whatsappImageUrl,         setWhatsappImageUrl]         = useState(DEFAULT_SITE_CONFIG.whatsappImageUrl)
-  const [invoiceEmailSubject,      setInvoiceEmailSubject]      = useState(DEFAULT_SITE_CONFIG.invoiceEmailSubject)
-  const [invoiceEmailBody,         setInvoiceEmailBody]         = useState(DEFAULT_SITE_CONFIG.invoiceEmailBody)
-  const [imgUploading,             setImgUploading]             = useState(false)
+  const [invoiceEmailSubject,    setInvoiceEmailSubject]    = useState(DEFAULT_SITE_CONFIG.invoiceEmailSubject)
+  const [invoiceEmailBody,       setInvoiceEmailBody]       = useState(DEFAULT_SITE_CONFIG.invoiceEmailBody)
+  const [invoiceLogoUrl,         setInvoiceLogoUrl]         = useState(DEFAULT_SITE_CONFIG.invoiceLogoUrl)
+  const [invoiceCompanyName,     setInvoiceCompanyName]     = useState(DEFAULT_SITE_CONFIG.invoiceCompanyName)
+  const [invoiceCompanyAddress,  setInvoiceCompanyAddress]  = useState(DEFAULT_SITE_CONFIG.invoiceCompanyAddress)
+  const [invoiceFooterText,      setInvoiceFooterText]      = useState(DEFAULT_SITE_CONFIG.invoiceFooterText)
+  const [logoUploading,          setLogoUploading]          = useState(false)
   const [colors, setColors] = useState({ colorGold: '#c9a96e', colorText: '#1a1a1a', colorBg: '#ffffff', colorMuted: '#6f6c64' })
   const [saving,  setSaving]  = useState(false)
   const [saved,   setSaved]   = useState(false)
@@ -286,9 +289,12 @@ export default function ThemePage() {
       if (d.taxLabel)                   setTaxLabel(d.taxLabel)
       if (d.whatsappNumber          !== undefined) setWhatsappNumber(d.whatsappNumber ?? '')
       if (d.whatsappMessageTemplate !== undefined) setWhatsappMessageTemplate(d.whatsappMessageTemplate ?? '')
-      if (d.whatsappImageUrl        !== undefined) setWhatsappImageUrl(d.whatsappImageUrl ?? '')
       if (d.invoiceEmailSubject     !== undefined) setInvoiceEmailSubject(d.invoiceEmailSubject ?? '')
       if (d.invoiceEmailBody        !== undefined) setInvoiceEmailBody(d.invoiceEmailBody ?? '')
+      if (d.invoiceLogoUrl          !== undefined) setInvoiceLogoUrl(d.invoiceLogoUrl ?? '')
+      if (d.invoiceCompanyName      !== undefined) setInvoiceCompanyName(d.invoiceCompanyName ?? 'Murgdur')
+      if (d.invoiceCompanyAddress   !== undefined) setInvoiceCompanyAddress(d.invoiceCompanyAddress ?? '')
+      if (d.invoiceFooterText       !== undefined) setInvoiceFooterText(d.invoiceFooterText ?? '')
       setColors({
         colorGold:  d.colorGold  ?? '#c9a96e',
         colorText:  d.colorText  ?? '#1a1a1a',
@@ -338,8 +344,9 @@ export default function ThemePage() {
         sizeGuideContactLinkText: sgContactLinkText,
         sizeGuideContactLinkUrl:  sgContactLinkUrl,
         shippingCost, taxRate, taxLabel,
-        whatsappNumber, whatsappMessageTemplate, whatsappImageUrl,
+        whatsappNumber, whatsappMessageTemplate,
         invoiceEmailSubject, invoiceEmailBody,
+        invoiceLogoUrl, invoiceCompanyName, invoiceCompanyAddress, invoiceFooterText,
         ...colors,
       })
       setSaved(true)
@@ -664,43 +671,6 @@ export default function ThemePage() {
             />
           </div>
 
-          {/* WhatsApp catalog image — upload */}
-          <div className="border border-luxury-gray/50 rounded-xl p-5 space-y-3">
-            <h3 className="text-luxury-white text-xs tracking-luxury uppercase">WhatsApp Catalog Image (optional)</h3>
-            <p className="text-luxury-muted text-[10px]">
-              Upload a product catalog image. Its URL is appended to the message so the customer can manually attach it in WhatsApp (WhatsApp web does not support auto-attach via link).
-            </p>
-            <div className="flex items-center gap-4">
-              {whatsappImageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={whatsappImageUrl} alt="catalog" className="h-20 w-auto object-cover border border-luxury-gray rounded shrink-0" />
-              )}
-              <div className="space-y-2">
-                <label className={`flex items-center gap-2 cursor-pointer text-luxury-gold text-xs tracking-luxury uppercase hover:text-luxury-white transition-colors ${imgUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                  {imgUploading ? 'Uploading…' : (whatsappImageUrl ? 'Replace Image' : 'Upload Image')}
-                  <input type="file" accept="image/*" className="hidden"
-                    onChange={async e => {
-                      const file = e.target.files?.[0]; if (!file) return
-                      setImgUploading(true)
-                      try {
-                        const fd = new FormData(); fd.append('file', file); fd.append('prefix', 'whatsapp-catalog')
-                        const res = await api.post('/media/upload-image', fd, { headers: { 'Content-Type': undefined } })
-                        setWhatsappImageUrl(res.data?.url ?? res.data?.data?.url ?? '')
-                      } catch {}
-                      setImgUploading(false)
-                      e.target.value = ''
-                    }}
-                  />
-                </label>
-                {whatsappImageUrl && (
-                  <button onClick={() => setWhatsappImageUrl('')} className="text-red-400 text-[10px] tracking-luxury uppercase hover:text-red-300 transition-colors block">
-                    Remove image
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Invoice email template */}
           <div className="border border-luxury-gray/50 rounded-xl p-5 space-y-4">
             <h3 className="text-luxury-white text-xs tracking-luxury uppercase">Invoice Email Template</h3>
@@ -728,6 +698,67 @@ export default function ThemePage() {
                 placeholder={`<p>Dear {{customerName}},</p>\n<p>Thank you for your order <strong>{{orderNumber}}</strong>. Please find your invoice attached.</p>\n<p>Total: {{total}}</p>`}
                 className="w-full bg-luxury-black border border-luxury-gray text-luxury-white text-xs px-3 py-2 outline-none focus:border-luxury-gold rounded resize-none font-mono leading-relaxed"
               />
+            </div>
+          </div>
+
+          {/* Invoice PDF — branding + content */}
+          <div className="border border-luxury-gray/50 rounded-xl p-5 space-y-4">
+            <h3 className="text-luxury-white text-xs tracking-luxury uppercase">Invoice PDF — Branding</h3>
+            <p className="text-luxury-muted text-[10px]">
+              Customise the PDF sent to customers when an order is confirmed. Upload a logo to appear at the top of the invoice.
+            </p>
+
+            {/* Logo upload */}
+            <div>
+              <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-2">Company Logo</label>
+              <div className="flex items-center gap-4">
+                {invoiceLogoUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={invoiceLogoUrl} alt="logo" className="h-14 w-auto object-contain border border-luxury-gray rounded shrink-0 bg-white p-1" />
+                )}
+                <label className={`cursor-pointer text-luxury-gold text-xs tracking-luxury uppercase hover:text-luxury-white transition-colors ${logoUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  {logoUploading ? 'Uploading…' : (invoiceLogoUrl ? 'Replace Logo' : 'Upload Logo')}
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={async e => {
+                      const file = e.target.files?.[0]; if (!file) return
+                      setLogoUploading(true)
+                      try {
+                        const fd = new FormData(); fd.append('file', file); fd.append('prefix', 'invoice-logos')
+                        const res = await api.post('/media/upload-image', fd, { headers: { 'Content-Type': undefined } })
+                        setInvoiceLogoUrl(res.data?.url ?? res.data?.data?.url ?? '')
+                      } catch {}
+                      setLogoUploading(false); e.target.value = ''
+                    }}
+                  />
+                </label>
+                {invoiceLogoUrl && (
+                  <button onClick={() => setInvoiceLogoUrl('')} className="text-red-400 text-[10px] hover:text-red-300 transition-colors">
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Company Name</label>
+                <input value={invoiceCompanyName} onChange={e => setInvoiceCompanyName(e.target.value)}
+                  placeholder="Murgdur"
+                  className="w-full bg-luxury-black border border-luxury-gray text-luxury-white text-sm px-3 py-2 outline-none focus:border-luxury-gold rounded" />
+              </div>
+              <div>
+                <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Company Address</label>
+                <input value={invoiceCompanyAddress} onChange={e => setInvoiceCompanyAddress(e.target.value)}
+                  placeholder="123 Street, City, Country"
+                  className="w-full bg-luxury-black border border-luxury-gray text-luxury-white text-sm px-3 py-2 outline-none focus:border-luxury-gold rounded" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-luxury-muted text-[10px] uppercase tracking-luxury block mb-1">Footer Text (shown at bottom of PDF)</label>
+              <input value={invoiceFooterText} onChange={e => setInvoiceFooterText(e.target.value)}
+                placeholder="Thank you for shopping with Murgdur!"
+                className="w-full bg-luxury-black border border-luxury-gray text-luxury-white text-sm px-3 py-2 outline-none focus:border-luxury-gold rounded" />
             </div>
           </div>
 

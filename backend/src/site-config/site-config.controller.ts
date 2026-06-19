@@ -43,6 +43,10 @@ export class SiteConfigController {
     whatsappImageUrl?:         string
     invoiceEmailSubject?:      string
     invoiceEmailBody?:         string
+    invoiceLogoUrl?:           string
+    invoiceCompanyName?:       string
+    invoiceCompanyAddress?:    string
+    invoiceFooterText?:        string
   }) {
     return this.siteConfig.updateConfig(body)
   }

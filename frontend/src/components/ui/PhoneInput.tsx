@@ -36,10 +36,12 @@ interface Props {
   label?: string
   value: string        // full number: "+91XXXXXXXXXX"
   onChange: (full: string, valid: boolean) => void
+  /** Called whenever the country dial code changes — passes the country name */
+  onCountryChange?: (countryName: string) => void
   className?: string
 }
 
-export function PhoneInput({ label = 'Phone', value, onChange, className }: Props) {
+export function PhoneInput({ label = 'Phone', value, onChange, onCountryChange, className }: Props) {
   const parsed = parsePhone(value)
   const [dial,  setDial]  = useState(parsed.dial)
   const [local, setLocal] = useState(parsed.local)
@@ -61,6 +63,7 @@ export function PhoneInput({ label = 'Phone', value, onChange, className }: Prop
     const c = COUNTRIES.find(x => x.dial === newDial) ?? COUNTRIES[0]
     const d = digits
     onChange(newDial + d, d.length === c.digits)
+    onCountryChange?.(c.name)
   }
 
   function onLocalChange(e: React.ChangeEvent<HTMLInputElement>) {
