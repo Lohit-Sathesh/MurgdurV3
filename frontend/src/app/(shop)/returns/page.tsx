@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title:       'Returns & Exchanges',
+  description: 'Returns accepted within 14 days of receipt in unworn, original condition. Learn about the Murgdur returns and exchange process.',
+  alternates:  { canonical: '/returns' },
+}
+
 export default function ReturnsPage() {
   return (
     <div className="max-w-3xl mx-auto px-8 py-16">

@@ -104,6 +104,8 @@ export interface SiteConfig {
   whatsappImageUrl:        string
   invoiceEmailSubject:     string
   invoiceEmailBody:        string
+  faviconUrl:              string
+  ogImageUrl:              string
   invoiceLogoUrl:          string
   invoiceCompanyName:      string
   invoiceCompanyAddress:   string
@@ -155,6 +157,8 @@ export const DEFAULT_SITE_CONFIG: SiteConfig = {
   whatsappImageUrl:        '',
   invoiceEmailSubject:     '',
   invoiceEmailBody:        '',
+  faviconUrl:              '',
+  ogImageUrl:              '',
   invoiceLogoUrl:          '',
   invoiceCompanyName:      'Murgdur',
   invoiceCompanyAddress:   '',

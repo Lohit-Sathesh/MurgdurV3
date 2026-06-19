@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title:       'Shipping Information',
+  description: 'Complimentary delivery on all Murgdur orders. Learn about our shipping times, delivery partners, and international shipping options.',
+  alternates:  { canonical: '/shipping' },
+}
+
 export default function ShippingPage() {
   return (
     <div className="max-w-3xl mx-auto px-8 py-16">

@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title:       'Contact Us',
+  description: 'Get in touch with Murgdur. Our team is available to assist with orders, styling advice, sizing, and any other enquiries.',
+  alternates:  { canonical: '/contact' },
+}
+
 export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-8 py-16">
