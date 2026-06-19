@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title:       'About Us',
+  description: 'Founded in 2018, Murgdur is a luxury fashion house dedicated to crafting timeless pieces. Learn about our philosophy, craftsmanship, and commitment to sustainability.',
+  alternates:  { canonical: '/about' },
+}
+
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto px-8 py-16">

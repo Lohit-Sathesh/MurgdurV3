@@ -485,6 +485,9 @@ model SiteConfig {
   whatsappImageUrl         String  @default("")
   invoiceEmailSubject      String  @default("")
   invoiceEmailBody         String  @default("")
+  // Social media / SEO
+  faviconUrl               String  @default("")   // browser tab icon
+  ogImageUrl               String  @default("")   // default OG image for social share previews
   // Invoice PDF content customisation
   invoiceLogoUrl           String  @default("")   // logo image shown top-left of PDF
   invoiceCompanyName       String  @default("Murgdur")

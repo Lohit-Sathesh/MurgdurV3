@@ -252,6 +252,10 @@ export default function ThemePage() {
   const [whatsappMessageTemplate,  setWhatsappMessageTemplate]  = useState(DEFAULT_SITE_CONFIG.whatsappMessageTemplate)
   const [invoiceEmailSubject,    setInvoiceEmailSubject]    = useState(DEFAULT_SITE_CONFIG.invoiceEmailSubject)
   const [invoiceEmailBody,       setInvoiceEmailBody]       = useState(DEFAULT_SITE_CONFIG.invoiceEmailBody)
+  const [faviconUrl,             setFaviconUrl]             = useState(DEFAULT_SITE_CONFIG.faviconUrl)
+  const [faviconUploading,       setFaviconUploading]       = useState(false)
+  const [ogImageUrl,             setOgImageUrl]             = useState(DEFAULT_SITE_CONFIG.ogImageUrl)
+  const [ogImageUploading,       setOgImageUploading]       = useState(false)
   const [invoiceLogoUrl,         setInvoiceLogoUrl]         = useState(DEFAULT_SITE_CONFIG.invoiceLogoUrl)
   const [invoiceCompanyName,     setInvoiceCompanyName]     = useState(DEFAULT_SITE_CONFIG.invoiceCompanyName)
   const [invoiceCompanyAddress,  setInvoiceCompanyAddress]  = useState(DEFAULT_SITE_CONFIG.invoiceCompanyAddress)
@@ -291,6 +295,8 @@ export default function ThemePage() {
       if (d.whatsappMessageTemplate !== undefined) setWhatsappMessageTemplate(d.whatsappMessageTemplate ?? '')
       if (d.invoiceEmailSubject     !== undefined) setInvoiceEmailSubject(d.invoiceEmailSubject ?? '')
       if (d.invoiceEmailBody        !== undefined) setInvoiceEmailBody(d.invoiceEmailBody ?? '')
+      if (d.faviconUrl              !== undefined) setFaviconUrl(d.faviconUrl ?? '')
+      if (d.ogImageUrl              !== undefined) setOgImageUrl(d.ogImageUrl ?? '')
       if (d.invoiceLogoUrl          !== undefined) setInvoiceLogoUrl(d.invoiceLogoUrl ?? '')
       if (d.invoiceCompanyName      !== undefined) setInvoiceCompanyName(d.invoiceCompanyName ?? 'Murgdur')
       if (d.invoiceCompanyAddress   !== undefined) setInvoiceCompanyAddress(d.invoiceCompanyAddress ?? '')
@@ -346,6 +352,7 @@ export default function ThemePage() {
         shippingCost, taxRate, taxLabel,
         whatsappNumber, whatsappMessageTemplate,
         invoiceEmailSubject, invoiceEmailBody,
+        faviconUrl, ogImageUrl,
         invoiceLogoUrl, invoiceCompanyName, invoiceCompanyAddress, invoiceFooterText,
         ...colors,
       })
@@ -486,6 +493,36 @@ export default function ThemePage() {
             <label className="text-luxury-muted text-xs tracking-luxury uppercase block mb-2">Tagline / Motto (navbar subtitle)</label>
             <input value={siteMotto} onChange={e => setSiteMotto(e.target.value)}
               className="w-full bg-luxury-black border border-luxury-gray text-luxury-white px-3 py-2 text-sm outline-none focus:border-luxury-gold" />
+          </div>
+          <div>
+            <label className="text-luxury-muted text-xs tracking-luxury uppercase block mb-2">Favicon (browser tab icon)</label>
+            <p className="text-luxury-muted text-[10px] mb-3">Shown in browser tabs and bookmarks. Use a square image (PNG, ICO, or SVG) — 32×32px or larger.</p>
+            <div className="flex items-center gap-4">
+              {faviconUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={faviconUrl} alt="favicon preview" className="h-8 w-8 object-contain border border-luxury-gray rounded bg-white p-0.5 shrink-0" />
+              )}
+              <label className={`cursor-pointer text-luxury-gold text-xs tracking-luxury uppercase hover:text-luxury-white transition-colors ${faviconUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                {faviconUploading ? 'Uploading…' : (faviconUrl ? 'Replace Favicon' : 'Upload Favicon')}
+                <input type="file" accept="image/png,image/x-icon,image/svg+xml,image/webp" className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0]; if (!file) return
+                    setFaviconUploading(true)
+                    try {
+                      const fd = new FormData(); fd.append('file', file); fd.append('prefix', 'favicons')
+                      const res = await api.post('/media/upload-image', fd, { headers: { 'Content-Type': undefined } })
+                      setFaviconUrl(res.data?.url ?? res.data?.data?.url ?? '')
+                    } catch {}
+                    setFaviconUploading(false); e.target.value = ''
+                  }}
+                />
+              </label>
+              {faviconUrl && (
+                <button onClick={() => setFaviconUrl('')} className="text-red-400 text-[10px] hover:text-red-300 transition-colors">
+                  Remove
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -698,6 +735,40 @@ export default function ThemePage() {
                 placeholder={`<p>Dear {{customerName}},</p>\n<p>Thank you for your order <strong>{{orderNumber}}</strong>. Please find your invoice attached.</p>\n<p>Total: {{total}}</p>`}
                 className="w-full bg-luxury-black border border-luxury-gray text-luxury-white text-xs px-3 py-2 outline-none focus:border-luxury-gold rounded resize-none font-mono leading-relaxed"
               />
+            </div>
+          </div>
+
+          {/* Social Share Image (OG Image) */}
+          <div className="border border-luxury-gray/50 rounded-xl p-5 space-y-4">
+            <h3 className="text-luxury-white text-xs tracking-luxury uppercase">Social Share Image</h3>
+            <p className="text-luxury-muted text-[10px]">
+              This image appears when your site is shared on WhatsApp, Instagram, Twitter, LinkedIn etc. Recommended size: 1200 × 630px.
+            </p>
+            <div className="flex items-center gap-4">
+              {ogImageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={ogImageUrl} alt="OG preview" className="h-16 w-auto object-cover border border-luxury-gray rounded shrink-0" />
+              )}
+              <label className={`cursor-pointer text-luxury-gold text-xs tracking-luxury uppercase hover:text-luxury-white transition-colors ${ogImageUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                {ogImageUploading ? 'Uploading…' : (ogImageUrl ? 'Replace Image' : 'Upload Image')}
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={async e => {
+                    const file = e.target.files?.[0]; if (!file) return
+                    setOgImageUploading(true)
+                    try {
+                      const fd = new FormData(); fd.append('file', file); fd.append('prefix', 'og-images')
+                      const res = await api.post('/media/upload-image', fd, { headers: { 'Content-Type': undefined } })
+                      setOgImageUrl(res.data?.url ?? res.data?.data?.url ?? '')
+                    } catch {}
+                    setOgImageUploading(false); e.target.value = ''
+                  }}
+                />
+              </label>
+              {ogImageUrl && (
+                <button onClick={() => setOgImageUrl('')} className="text-red-400 text-[10px] hover:text-red-300 transition-colors">
+                  Remove
+                </button>
+              )}
             </div>
           </div>
 

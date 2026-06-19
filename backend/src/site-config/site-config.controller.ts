@@ -43,6 +43,8 @@ export class SiteConfigController {
     whatsappImageUrl?:         string
     invoiceEmailSubject?:      string
     invoiceEmailBody?:         string
+    faviconUrl?:               string
+    ogImageUrl?:               string
     invoiceLogoUrl?:           string
     invoiceCompanyName?:       string
     invoiceCompanyAddress?:    string

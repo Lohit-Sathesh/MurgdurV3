@@ -47,12 +47,41 @@ const getSiteConfig = cache(async (): Promise<any> => {
   return null
 })
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://murgdur.com'
+
 export async function generateMetadata(): Promise<Metadata> {
-  const config = await getSiteConfig()
-  const title  = config?.siteTitle ?? 'Murgdur'
+  const config      = await getSiteConfig()
+  const title       = config?.siteTitle    ?? 'Murgdur'
+  const description = config?.footerTagline ?? 'Luxury fashion crafted for the extraordinary.'
+  const ogImage     = config?.ogImageUrl  || null
+  const favicon     = config?.faviconUrl  || null
+
   return {
-    title:       { default: title, template: `%s | ${title}` },
-    description: config?.footerTagline ?? 'Luxury fashion. Crafted for the extraordinary.',
+    metadataBase: new URL(SITE_URL),
+    ...(favicon && { icons: { icon: favicon, shortcut: favicon, apple: favicon } }),
+    title:        { default: title, template: `%s | ${title}` },
+    description,
+    keywords:     ['luxury fashion', 'luxury clothing', 'designer wear', 'premium fashion India', 'Murgdur'],
+    authors:      [{ name: 'Murgdur' }],
+    robots: process.env.NODE_ENV === 'production'
+      ? { index: true,  follow: true,  googleBot: { index: true,  follow: true  } }
+      : { index: false, follow: false, googleBot: { index: false, follow: false } },
+    openGraph: {
+      type:        'website',
+      locale:      'en_IN',
+      url:         SITE_URL,
+      siteName:    title,
+      title,
+      description,
+      ...(ogImage && { images: [{ url: ogImage, width: 1200, height: 630, alt: title }] }),
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title,
+      description,
+      ...(ogImage && { images: [ogImage] }),
+    },
+    alternates: { canonical: SITE_URL },
   }
 }
 
@@ -104,10 +133,44 @@ const fontVars = [
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const config     = await getSiteConfig()
   const dynamicCss = buildCss(config)
+  const siteTitle  = config?.siteTitle  ?? 'Murgdur'
+  const ogImage    = config?.ogImageUrl || null
+
+  const organizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name:    siteTitle,
+    url:     SITE_URL,
+    ...(ogImage && { logo: ogImage }),
+    sameAs:  [
+      'https://instagram.com/murgdur',
+      'https://facebook.com/murgdur',
+    ],
+    contactPoint: {
+      '@type':             'ContactPoint',
+      contactType:         'customer service',
+      availableLanguage:   'English',
+      url:                 `${SITE_URL}/contact`,
+    },
+  }
+
+  const websiteSchema = {
+    '@context':        'https://schema.org',
+    '@type':           'WebSite',
+    name:              siteTitle,
+    url:               SITE_URL,
+    potentialAction: {
+      '@type':       'SearchAction',
+      target:        { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/collections/new-arrivals?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  }
 
   return (
     <html lang="en" suppressHydrationWarning className={fontVars}>
       <body suppressHydrationWarning>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }} />
         {dynamicCss && <style dangerouslySetInnerHTML={{ __html: dynamicCss }} />}
         <Providers siteConfig={config ?? undefined}>
           <SiteChrome>

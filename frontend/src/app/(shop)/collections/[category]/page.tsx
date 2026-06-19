@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { ProductGrid } from '@/components/shop/ProductGrid'
 import { CategoryHero } from '@/components/shop/CategoryHero'
@@ -6,6 +7,29 @@ import { FilterPanel } from '@/components/shop/FilterPanel'
 import { api } from '@/lib/api'
 
 export const revalidate = 60
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://murgdur.com'
+
+export async function generateMetadata({ params }: { params: { category: string } }): Promise<Metadata> {
+  try {
+    const res = await api.get(`/products?category=${params.category}&limit=1`)
+    const category = res.data?.category
+    const name     = category?.name ?? params.category.replace(/-/g, ' ')
+    const title    = `${name.charAt(0).toUpperCase() + name.slice(1)} Collection`
+    const description = category?.description
+      ?? `Shop the ${name} collection at Murgdur — luxury fashion crafted for the extraordinary.`
+    const canonical = `${SITE_URL}/collections/${params.category}`
+    return {
+      title,
+      description,
+      openGraph: { title, description, url: canonical, images: [{ url: '/og-default.jpg', width: 1200, height: 630 }] },
+      twitter:   { card: 'summary_large_image', title, description },
+      alternates: { canonical },
+    }
+  } catch {
+    return { title: params.category }
+  }
+}
 
 export async function generateStaticParams() {
   try {

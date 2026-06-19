@@ -20,7 +20,12 @@ export class AuthController {
   register(@Body() dto: RegisterDto) { return this.auth.register(dto) }
 
   @Post('login')
-  login(@Body() dto: LoginDto, @Req() req: Request) { return this.auth.login(dto, req.ip ?? 'unknown') }
+  login(@Body() dto: LoginDto, @Req() req: Request) {
+    // X-Forwarded-For is set by reverse proxies (nginx, Cloudflare, etc.) in production
+    const forwarded = req.headers['x-forwarded-for']
+    const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(',')[0]) ?? req.ip ?? 'unknown'
+    return this.auth.login(dto, ip.trim())
+  }
 
   @Post('google')
   googleSignIn(@Body() body: { email: string; firstName: string; lastName: string; picture?: string }) {
