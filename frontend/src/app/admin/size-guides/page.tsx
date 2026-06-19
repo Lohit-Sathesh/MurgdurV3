@@ -186,7 +186,7 @@ function GuideEditor({ guide, onSave, onDelete }: {
         <div key={block.id} className="border border-luxury-gray/30 rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-luxury-muted text-[10px] uppercase tracking-luxury">
-              {block.type === 'image' ? '📷 Image' : block.type === 'table' ? '📊 Measurement Table' : '📝 Text'}
+              {block.type === 'image' ? 'Image' : block.type === 'table' ? 'Measurement Table' : 'Text'}
             </span>
             <div className="flex items-center gap-2">
               <button onClick={() => i > 0 && setBlocks(b => move(b, i, i - 1))} disabled={i === 0}

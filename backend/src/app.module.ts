@@ -17,6 +17,7 @@ import { NewsletterModule } from './newsletter/newsletter.module'
 import { SiteConfigModule } from './site-config/site-config.module'
 import { SizeGuideModule }   from './size-guide/size-guide.module'
 import { TempOrderModule }  from './temp-order/temp-order.module'
+import { CartModule }       from './cart/cart.module'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { TempOrderModule }  from './temp-order/temp-order.module'
     SiteConfigModule,
     SizeGuideModule,
     TempOrderModule,
+    CartModule,
   ],
 })
 export class AppModule {}

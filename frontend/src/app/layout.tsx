@@ -69,14 +69,16 @@ function buildCss(config: any): string {
     // Override CSS variables so font-serif / font-sans Tailwind classes pick up the new font
     lines.push(`html{--font-serif:${family};--font-sans:${family};}`)
     // :root body * has specificity 0-1-1 which beats Tailwind class selectors (0-1-0),
-    // ensuring the global font and weight truly apply to every visible text element.
-    lines.push(`:root body *{font-family:${family};font-weight:${weight};}`)
+    // ensuring the global font truly applies to every visible text element.
+    // font-weight is intentionally NOT in this rule — headings need their own weight
+    // from globals.css / Tailwind (e.g. font-bold) which would otherwise be overridden.
+    lines.push(`:root body *{font-family:${family};}`)
     // Use clamp() so the global font size scales from mobile to desktop
     // At 375px: ~87.5% of configured size; at 1440px: 100%
     const pxVal   = parseFloat(size)
     const minSize = Math.max(14, Math.round(pxVal * 0.875))
     lines.push(`html{font-size:clamp(${minSize}px,${(pxVal/1440*100).toFixed(2)}vw + ${minSize * 0.1}px,${size});}`)
-    lines.push(`body{font-style:${style};}`)
+    lines.push(`body{font-weight:${weight};font-style:${style};}`)
   }
 
   const DEFAULTS: Record<string,string> = { colorGold:'#c9a96e', colorText:'#1a1a1a', colorBg:'#ffffff', colorMuted:'#6f6c64' }

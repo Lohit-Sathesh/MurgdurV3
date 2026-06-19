@@ -224,9 +224,9 @@ function BlockCard({ block, handle, scrollSlides, onSave, onDelete, onToggle }: 
   const { toast } = useAdminToast()
 
   const TYPE_LABELS: Record<string, string> = {
-    scroll:    '📷 Scroll Section',
-    products:  '🛍️ Product Block',
-    editorial: '✍️ Editorial Block',
+    scroll:    'Scroll Section',
+    products:  'Product Block',
+    editorial: 'Editorial Block',
   }
 
   async function save() {
@@ -418,9 +418,9 @@ export default function AdminHomepagePage() {
                 {addOpen && (
                   <div className="absolute right-0 top-full mt-2 bg-luxury-black border border-luxury-gray rounded-xl shadow-2xl z-20 w-52 overflow-hidden">
                     {[
-                      { type: 'scroll' as const,    label: '📷 Scroll Section',  desc: 'Full-screen scroll image/video' },
-                      { type: 'products' as const,  label: '🛍️ Product Block',   desc: 'Hand-picked products grid'      },
-                      { type: 'editorial' as const, label: '✍️ Editorial Block',  desc: 'Text, headline, CTA button'    },
+                      { type: 'scroll' as const,    label: 'Scroll Section',  desc: 'Full-screen scroll image/video' },
+                      { type: 'products' as const,  label: 'Product Block',   desc: 'Hand-picked products grid'      },
+                      { type: 'editorial' as const, label: 'Editorial Block',  desc: 'Text, headline, CTA button'    },
                     ].map(opt => (
                       <button key={opt.type} onClick={() => addBlock(opt.type)}
                         className="w-full text-left px-4 py-3 hover:bg-luxury-white/5 transition-colors border-b border-luxury-gray/30 last:border-0">
